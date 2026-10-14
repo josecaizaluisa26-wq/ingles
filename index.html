@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>English Coach</title>
+<link id="manifest-link" rel="manifest">
+<style>
+/* ====== DESIGN TOKENS ====== */
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--text:#c9d1d9;--text-muted:#8b949e;
+  --accent:#d4920a;--accent-hover:#e8a520;--accent-dim:#3d2800;--success:#3fb950;
+  --warning:#d2991d;--error:#f85149;--border:#30363d;--ring-bg:#21262d;
+  --radius:10px;--radius-sm:6px;--font:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:'SF Mono',Consolas,'Liberation Mono',monospace;
+  --base-size:18px;--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;
+  --nav-h:64px;--header-h:56px;
+}
+@media(prefers-color-scheme:light){
+  :root{--bg:#f7f3eb;--surface:#ffffff;--surface2:#f0ece4;--text:#1a1a2e;--text-muted:#6b7280;
+    --accent:#b87a00;--accent-hover:#9a6500;--accent-dim:#fff3d4;--success:#2d8a4e;--warning:#b8860b;
+    --error:#c62828;--border:#e1ddd5;--ring-bg:#f0ece4;}
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:var(--base-size);scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;min-height:100vh;padding-bottom:var(--nav-h);}
+@media(min-width:768px){body{padding-bottom:0;}}
+a{color:var(--accent);text-decoration:none;}
+button{cursor:pointer;font-family:var(--font);border:none;background:none;color:inherit;font-size:inherit;}
+input,select,textarea{font-family:var(--font);font-size:inherit;color:var(--text);background:var(--surface2);
+  border:1px solid var(--border);border-radius:var(--radius-sm);padding:var(--space-sm) var(--space-md);
+  outline:none;transition:border-color 150ms;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+::selection{background:var(--accent);color:#000;}
+
+/* ====== LAYOUT ====== */
+#app{display:none;max-width:680px;margin:0 auto;padding:0 var(--space-md);}
+#app.active{display:block;}
+/* Header */
+.app-header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);
+  padding:var(--space-sm) var(--space-md);display:flex;align-items:center;justify-content:space-between;
+  height:var(--header-h);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.app-header h1{font-size:1.15rem;font-weight:700;letter-spacing:-0.02em;}
+.header-actions{display:flex;gap:var(--space-sm);align-items:center;}
+.icon-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;
+  transition:background 150ms;}
+.icon-btn:hover{background:var(--surface2);}
+.icon-btn svg{width:22px;height:22px;fill:currentColor;}
+
+/* Bottom Nav (Mobile) */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--bg);border-top:1px solid var(--border);
+  height:var(--nav-h);display:flex;align-items:center;justify-content:space-around;padding:env(safe-area-inset-bottom) 0 var(--space-xs);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+@media(min-width:768px){.bottom-nav{display:none;}}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:0.7rem;color:var(--text-muted);
+  padding:var(--space-xs) var(--space-sm);transition:color 150ms;min-width:44px;min-height:44px;justify-content:center;}
+.nav-item.active{color:var(--accent);}
+.nav-item svg{width:24px;height:24px;fill:currentColor;}
+.nav-item span{font-weight:600;}
+
+/* Top Nav (Desktop) */
+.top-nav{display:none;position:sticky;top:var(--header-h);z-index:90;background:var(--bg);border-bottom:1px solid var(--border);
+  padding:0 var(--space-md);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+@media(min-width:768px){.top-nav{display:flex;gap:0;}}
+.top-nav-btn{flex-shrink:0;padding:var(--space-sm) var(--space-md);font-size:0.85rem;font-weight:600;
+  color:var(--text-muted);border-bottom:2px solid transparent;white-space:nowrap;min-height:44px;
+  display:flex;align-items:center;transition:color 150ms,border-color 150ms;}
+.top-nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.top-nav-btn:hover{color:var(--text);}
+
+/* Main Content */
+.main-content{padding:var(--space-md);padding-bottom:calc(var(--nav-h) + var(--space-lg));}
+@media(min-width:768px){.main-content{padding:var(--space-xl) var(--space-md);padding-bottom:var(--space-xl);}}
+.tab-page{display:none;}
+.tab-page.active{display:block;animation:fadeIn 200ms ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ====== COMPONENTS ====== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-md);
+  margin-bottom:var(--space-md);transition:border-color 150ms;}
+.card:hover{border-color:var(--text-muted);}
+.card h3{font-size:1rem;margin-bottom:var(--space-sm);font-weight:700;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-lg);
+  border-radius:var(--radius-sm);font-weight:600;font-size:0.9rem;min-height:44px;min-width:44px;
+  transition:background 150ms,transform 100ms;border:1px solid var(--border);}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--accent);color:#000;border-color:var(--accent);}
+.btn-primary:hover{background:var(--accent-hover);}
+.btn-secondary{background:var(--surface2);color:var(--text);}
+.btn-secondary:hover{background:var(--border);}
+.btn-success{background:var(--success);color:#fff;border-color:var(--success);}
+.btn-danger{background:var(--error);color:#fff;border-color:var(--error);}
+.btn-sm{padding:var(--space-xs) var(--space-md);font-size:0.8rem;min-height:36px;}
+.btn-block{width:100%;justify-content:center;}
+.btn:disabled{opacity:0.4;pointer-events:none;}
+
+/* Progress Ring */
+.progress-ring{position:relative;width:100px;height:100px;margin:0 auto;}
+.progress-ring svg{transform:rotate(-90deg);}
+.progress-ring-bg{fill:none;stroke:var(--ring-bg);stroke-width:8;}
+.progress-ring-fill{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;
+  transition:stroke-dashoffset 300ms ease;}
+.progress-ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;font-weight:700;}
+
+/* Session Block */
+.session-block{border-left:3px solid var(--border);padding:var(--space-md);margin-bottom:var(--space-md);
+  background:var(--surface);border-radius:0 var(--radius-sm) var(--radius-sm) 0;transition:border-color 150ms;}
+.session-block.completed{border-left-color:var(--success);opacity:0.7;}
+.session-block.active{border-left-color:var(--accent);}
+.session-block h4{font-size:0.9rem;margin-bottom:var(--space-xs);display:flex;align-items:center;gap:var(--space-sm);}
+.session-block .block-time{font-size:0.75rem;color:var(--text-muted);font-weight:400;}
+.session-block .block-desc{font-size:0.85rem;color:var(--text-muted);margin-bottom:var(--space-sm);}
+
+/* Flashcard */
+.flashcard{perspective:800px;min-height:180px;margin:var(--space-md) auto;}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.5s;transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-front,.flashcard-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);
+  padding:var(--space-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.flashcard-front{background:var(--surface);border:1px solid var(--border);}
+.flashcard-back{background:var(--accent-dim);border:1px solid var(--accent);transform:rotateY(180deg);}
+.flashcard .word-en{font-size:1.6rem;font-weight:700;color:var(--accent);margin-bottom:var(--space-xs);}
+.flashcard .pron{font-size:0.85rem;color:var(--text-muted);font-family:var(--font-mono);}
+.flashcard .meaning{font-size:1rem;margin-top:var(--space-sm);}
+.flashcard .example{font-size:0.85rem;color:var(--text-muted);margin-top:var(--space-md);font-style:italic;}
+
+/* SRS Buttons */
+.srs-actions{display:flex;gap:var(--space-sm);flex-wrap:wrap;justify-content:center;margin-top:var(--space-md);}
+.srs-actions .btn{flex:1;min-width:100px;}
+.srs-actions .btn-again{background:#f8514920;color:var(--error);border-color:var(--error);}
+.srs-actions .btn-hard{background:var(--warning)20;color:var(--warning);border-color:var(--warning);}
+.srs-actions .btn-good{background:var(--success)20;color:var(--success);border-color:var(--success);}
+.srs-actions .btn-easy{background:var(--accent)20;color:var(--accent);border-color:var(--accent);}
+
+/* Badge */
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;
+  background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);}
+.badge-accent{background:var(--accent);color:#000;border-color:var(--accent);}
+.badge-success{background:var(--success);color:#fff;border-color:var(--success);}
+
+/* Heatmap */
+.heatmap{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;}
+.heatmap-cell{width:12px;height:12px;border-radius:2px;background:var(--surface2);transition:transform 150ms;}
+.heatmap-cell:hover{transform:scale(1.3);}
+.heatmap-legend{display:flex;align-items:center;gap:4px;font-size:0.7rem;color:var(--text-muted);margin-top:var(--space-sm);}
+.heatmap-legend .cell{width:12px;height:12px;border-radius:2px;}
+
+/* Streak */
+.streak-display{display:flex;align-items:center;gap:var(--space-sm);}
+.streak-fire{font-size:1.5rem;}
+.streak-count{font-size:1.3rem;font-weight:700;color:var(--accent);}
+
+/* XP Bar */
+.xp-bar{height:6px;background:var(--ring-bg);border-radius:3px;overflow:hidden;margin-top:var(--space-xs);}
+.xp-fill{height:100%;background:var(--accent);border-radius:3px;transition:width 400ms ease;}
+
+/* Tags */
+.tag-list{display:flex;flex-wrap:wrap;gap:var(--space-xs);}
+.tag{padding:var(--space-xs) var(--space-sm);border-radius:var(--radius-sm);font-size:0.75rem;font-weight:600;
+  background:var(--surface2);border:1px solid var(--border);}
+.tag-active{background:var(--accent);color:#000;border-color:var(--accent);}
+
+/* Speaking Challenge */
+.challenge-audio{width:100%;margin:var(--space-sm) 0;}
+.challenge-audio audio{width:100%;height:36px;}
+.recording-indicator{display:inline-flex;align-items:center;gap:6px;color:var(--error);font-weight:700;}
+.recording-dot{width:10px;height:10px;border-radius:50%;background:var(--error);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* Pronunciation Pairs */
+.pron-pair{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-sm) 0;border-bottom:1px solid var(--border);}
+.pron-pair:last-child{border-bottom:none;}
+.pron-pair .sound{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--accent);min-width:60px;}
+
+/* Role Play */
+.roleplay-step{padding:var(--space-md);border-left:3px solid var(--accent);margin-bottom:var(--space-md);background:var(--surface);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+.roleplay-step .step-num{font-size:0.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;}
+.roleplay-vocab{display:flex;flex-wrap:wrap;gap:var(--space-xs);}
+.roleplay-vocab .vocab-item{background:var(--surface2);padding:var(--space-xs) var(--space-sm);border-radius:var(--radius-sm);
+  font-size:0.8rem;border:1px solid var(--border);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);display:flex;align-items:center;
+  justify-content:center;padding:var(--space-md);opacity:0;pointer-events:none;transition:opacity 200ms;}
+.modal-overlay.active{opacity:1;pointer-events:auto;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-lg);
+  max-width:480px;width:100%;max-height:85vh;overflow-y:auto;transform:translateY(20px);transition:transform 200ms;}
+.modal-overlay.active .modal{transform:translateY(0);}
+.modal h2{font-size:1.1rem;margin-bottom:var(--space-md);}
+.modal-actions{display:flex;gap:var(--space-sm);justify-content:flex-end;margin-top:var(--space-lg);}
+
+/* Onboarding */
+.onboarding-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;
+  text-align:center;padding:var(--space-xl) var(--space-md);}
+.onboarding-screen.active{display:flex;}
+.onboarding-screen h2{font-size:1.4rem;margin-bottom:var(--space-md);line-height:1.3;}
+.onboarding-screen p{color:var(--text-muted);margin-bottom:var(--space-lg);max-width:360px;}
+.onboarding-screen .btn{font-size:1rem;padding:var(--space-md) var(--space-xl);}
+.onboarding-progress{display:flex;gap:var(--space-sm);margin-bottom:var(--space-lg);}
+.onboarding-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background 200ms;}
+.onboarding-dot.active{background:var(--accent);}
+.diagnostic-option{display:block;width:100%;text-align:left;padding:var(--space-sm) var(--space-md);
+  border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:var(--space-xs);
+  transition:border-color 150ms,background 150ms;min-height:44px;display:flex;align-items:center;}
+.diagnostic-option:hover{border-color:var(--accent);background:var(--surface2);}
+.diagnostic-option.selected{border-color:var(--accent);background:var(--accent-dim);}
+
+/* Quiz Option */
+.quiz-option{display:block;width:100%;text-align:left;padding:var(--space-sm) var(--space-md);
+  border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:var(--space-xs);
+  transition:border-color 150ms;min-height:44px;display:flex;align-items:center;}
+.quiz-option:hover{border-color:var(--accent);}
+.quiz-option.correct{border-color:var(--success);background:var(--success)20;}
+.quiz-option.wrong{border-color:var(--error);background:var(--error)20;}
+
+/* Session Timer */
+.session-timer{font-family:var(--font-mono);font-size:0.85rem;color:var(--text-muted);}
+
+/* Insight Card */
+.insight-card{background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--radius);
+  padding:var(--space-md);margin-top:var(--space-md);}
+.insight-card h4{color:var(--accent);font-size:0.9rem;margin-bottom:var(--space-xs);}
+
+/* Metric */
+.metric{text-align:center;padding:var(--space-md);}
+.metric-value{font-size:1.8rem;font-weight:700;color:var(--accent);}
+.metric-label{font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-xs);}
+.metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-sm);}
+
+/* Area bar */
+.area-bar{display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm);}
+.area-bar-label{font-size:0.75rem;min-width:100px;text-align:right;color:var(--text-muted);}
+.area-bar-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.area-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width 400ms ease;}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(var(--nav-h) + var(--space-md));left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-sm) var(--space-lg);
+  font-size:0.85rem;z-index:300;opacity:0;transition:opacity 200ms,transform 200ms;pointer-events:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(min-width:768px){.toast{bottom:var(--space-md);}}
+
+/* Utility */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;}
+.text-center{text-align:center;}
+.mt-sm{margin-top:var(--space-sm)}.mt-md{margin-top:var(--space-md)}.mt-lg{margin-top:var(--space-lg)}.mb-sm{margin-bottom:var(--space-sm)}.mb-md{margin-bottom:var(--space-md)}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-sm{gap:var(--space-sm)}.gap-md{gap:var(--space-md)}
+.text-sm{font-size:0.8rem}.text-muted{color:var(--text-muted)}.text-accent{color:var(--accent)}.font-bold{font-weight:700}
+.hidden{display:none!important}
+
+/* prefers reduced motion */
+@media(prefers-reduced-motion:reduce){*{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* Quick session banner */
+.quick-session-banner{background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--radius);
+  padding:var(--space-md);margin-bottom:var(--space-md);display:flex;align-items:center;gap:var(--space-md);}
+.quick-session-banner .btn{font-size:0.8rem;padding:var(--space-xs) var(--space-md);}
+</style>
+</head>
+<body>
+
+<!-- ==================== ONBOARDING ==================== -->
+<div id="onboarding">
+  <!-- Paso 1: Bienvenida -->
+  <div class="onboarding-screen active" id="ob-1">
+    <div style="font-size:3rem;margin-bottom:var(--space-lg);">⚙️</div>
+    <h2>Esto no es un curso.<br>Es un entrenador personal.</h2>
+    <p>Tu inglés no se perdió: se oxidó. English Coach está diseñado para reactivarlo, día a día, en 15 minutos. Sin juegos infantiles, sin búhos. Para ingenieros, por ingenieros.</p>
+    <button class="btn btn-primary" onclick="nextOnboarding(2)">Empezar</button>
+  </div>
+  <!-- Paso 2: Diagnóstico -->
+  <div class="onboarding-screen" id="ob-2">
+    <h2>Diagnóstico rápido</h2>
+    <p>12 preguntas para calibrar tu nivel. No hay respuestas incorrectas, solo honestas.</p>
+    <div id="ob-diag-content" style="width:100%;max-width:400px;"></div>
+    <div class="flex justify-between mt-md" style="width:100%;max-width:400px;">
+      <button class="btn btn-secondary btn-sm" id="ob-diag-back" onclick="prevOnboarding()">Atrás</button>
+      <button class="btn btn-primary btn-sm" id="ob-diag-next" onclick="nextOnboarding(3)">Siguiente</button>
+    </div>
+    <div class="onboarding-progress mt-md" id="ob-diag-progress"></div>
+  </div>
+  <!-- Paso 3: Hora diaria -->
+  <div class="onboarding-screen" id="ob-3">
+    <h2>¿Cuándo practicas?</h2>
+    <p>Elige la franja horaria habitual para recibir tu plan diario.</p>
+    <select id="ob-hour" class="mt-md" style="max-width:200px;font-size:1rem;">
+      <option value="7">Temprano (7:00)</option>
+      <option value="8">Mañana (8:00)</option>
+      <option value="12" selected>Mediodía (12:00)</option>
+      <option value="14">Tarde (14:00)</option>
+      <option value="17">Salida del trabajo (17:00)</option>
+      <option value="19">Noche (19:00)</option>
+      <option value="21">Tarde-noche (21:00)</option>
+    </select>
+    <button class="btn btn-primary mt-lg" onclick="finishOnboarding()">Listo, empezar</button>
+  </div>
+</div>
+
+<!-- ==================== MAIN APP ==================== -->
+<div id="app">
+  <header class="app-header">
+    <h1>English Coach</h1>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema" title="Tema">
+        <svg id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="top-nav" id="top-nav" role="navigation" aria-label="Navegación principal"></nav>
+
+  <main class="main-content" id="main-content"></main>
+
+  <nav class="bottom-nav" id="bottom-nav" role="navigation" aria-label="Navegación inferior"></nav>
+</div>
+
+<!-- Modal overlay -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ============================================
+// English Coach - App Principal
+// Archivo único index.html para GitHub Pages
+// Todo funciona offline, 100% autocontenido
+// ============================================
+
+// --- Constantes de estado ---
+const STORAGE_KEY = 'englishcoach.v1';
+const STATE_VERSION = 1;
+const TODAY = new Date().toISOString().slice(0, 10);
+const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+// --- Navegación de tabs ---
+const TABS = [
+  { id:'hoy', label:'Hoy', icon:'<rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="3 9 9 3 15 9" fill="none" stroke="currentColor" stroke-width="2"/><line x1="9" y1="3" x2="9" y2="15" stroke="currentColor" stroke-width="2"/>' },
+  { id:'hablar', label:'Hablar', icon:'<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19 10v2a7 7 0 01-14 0v-2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2"/>' },
+  { id:'vocabulario', label:'Vocabulario', icon:'<rect x="2" y="3" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" stroke-width="2"/>' },
+  { id:'mi-trabajo', label:'Mi Trabajo', icon:'<rect x="2" y="3" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" stroke-width="2"/>' },
+  { id:'progreso', label:'Progreso', icon:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" fill="none" stroke="currentColor" stroke-width="2"/>' },
+  { id:'guia', label:'Guía', icon:'<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="8" r="1" fill="currentColor"/>' },
+];
+
+// ============================================
+// VOCABULARIO - Mazo base de 90+ tarjetas SM-2
+// ============================================
+const VOCABULARY = [
+  // Fábrica y Procesos
+  {id:'fab-01',en:'OEE',pron:'oh-EE',es:'Eficiencia Global del Equipo',area:'Fábrica y Procesos',level:'A2',example:'Our OEE this shift reached 87%.',context:'Fábrica y Procesos'},
+  {id:'fab-02',en:'Throughput',pron:'THRU-pout',es:'Producción por unidad de tiempo',area:'Fábrica y Procesos',level:'A2',example:'The throughput of line 3 dropped by 12%.',context:'Fábrica y Procesos'},
+  {id:'fab-03',en:'Downtime',pron:'DOWN-time',es:'Tiempo de inactividad',area:'Fábrica y Procesos',level:'A1',example:'Unplanned downtime cost us two hours.',context:'Fábrica y Procesos'},
+  {id:'fab-04',en:'Bottleneck',pron:'BOT-lnek',es:'Cuello de botella',area:'Fábrica y Procesos',level:'B1',example:'The welding station is our main bottleneck.',context:'Fábrica y Procesos'},
+  {id:'fab-05',en:'Shift Handover',pron:'SHIFT HAN-doh-ver',es:'Entrega de turno',area:'Fábrica y Procesos',level:'A2',example:'The shift handover noted a pressure drop.',context:'Fábrica y Procesos'},
+  {id:'fab-06',en:'Root Cause',pron:'ROOT kawz',es:'Causa raíz',area:'Fábrica y Procesos',level:'B1',example:'We found the root cause: a worn bearing.',context:'Fábrica y Procesos'},
+  {id:'fab-07',en:'Rework',pron:'ree-WURK',es:'Retrabajo',area:'Fábrica y Procesos',level:'A2',example:'Rework increased because of dimensional errors.',context:'Fábrica y Procesos'},
+  {id:'fab-08',en:'Scrap Rate',pron:'SKRAP rayt',es:'Tasa de desecho',area:'Fábrica y Procesos',level:'B1',example:'The scrap rate fell below 2%.',context:'Fábrica y Procesos'},
+  {id:'fab-09',en:'Takt Time',pron:'TAKT taim',es:'Tiempo de ciclo',area:'Fábrica y Procesos',level:'B1',example:'Takt time for this product is 45 seconds.',context:'Fábrica y Procesos'},
+  {id:'fab-10',en:'Work Order',pron:'WURK OR-der',es:'Orden de trabajo',area:'Fábrica y Procesos',level:'A2',example:'The work order was closed after inspection.',context:'Fábrica y Procesos'},
+  {id:'fab-11',en:'Maintenance Schedule',pron:'MAINT-in-ans SKED-yool',es:'Programa de mantenimiento',area:'Fábrica y Procesos',level:'A2',example:'Follow the maintenance schedule strictly.',context:'Fábrica y Procesos'},
+  {id:'fab-12',en:'Yield',pron:'YIELD',es:'Rendimiento / Tasa de producción buena',area:'Fábrica y Procesos',level:'A2',example:'The yield improved to 94% this week.',context:'Fábrica y Procesos'},
+  {id:'fab-13',en:'Cycle Time',pron:'SY-kul taim',es:'Tiempo de ciclo',area:'Fábrica y Procesos',level:'A2',example:'We reduced cycle time by 8 seconds.',context:'Fábrica y Procesos'},
+  {id:'fab-14',en:'Preventive Maintenance',pron:'pri-ven-TIV MAINT-in-ans',es:'Mantenimiento preventivo',area:'Fábrica y Procesos',level:'B1',example:'Preventive maintenance avoids unexpected stops.',context:'Fábrica y Procesos'},
+  {id:'fab-15',en:'Line Balancing',pron:'LINE BAL-un-sing',es:'Balanceo de línea',area:'Fábrica y Procesos',level:'B1',example:'Line balancing reduced idle time on station 5.',context:'Fábrica y Procesos'},
+
+  // Seguridad
+  {id:'sec-01',en:'PPE',pron:'P-P-E',es:'Equipo de Protección Personal',area:'Seguridad',level:'A1',example:'Always wear PPE in the production area.',context:'Seguridad'},
+  {id:'sec-02',en:'Lockout/Tagout',pron:'LAWK-out TAG-out',es:'Bloqueo y etiquetado de energía',area:'Seguridad',level:'B1',example:'Lockout/tagout procedure must be followed before repairs.',context:'Seguridad'},
+  {id:'sec-03',en:'Near Miss',pron:'NEER mis',es:'Casi accidente',area:'Seguridad',level:'A2',example:'We had three near misses this week.',context:'Seguridad'},
+  {id:'sec-04',en:'Hazard',pron:'HAZ-erd',es:'Peligro / Riesgo',area:'Seguridad',level:'A2',example:'The chemical storage is a fire hazard.',context:'Seguridad'},
+  {id:'sec-05',en:'Safety Briefing',pron:'SAY-f-ee BRIE-fing',es:'Reunión de seguridad',area:'Seguridad',level:'A2',example:'The safety briefing starts at 7 AM sharp.',context:'Seguridad'},
+  {id:'sec-06',en:'Incident Report',pron:'IN-sih-dent ri-PORT',es:'Reporte de incidente',area:'Seguridad',level:'B1',example:'Every incident report must be filed within 24 hours.',context:'Seguridad'},
+  {id:'sec-07',en:'Evacuation Route',pron:'ee-vak-yoo-AY-shun ROHT',es:'Ruta de evacuación',area:'Seguridad',level:'A2',example:'Know the evacuation route for your zone.',context:'Seguridad'},
+  {id:'sec-08',en:'Safety Observation',pron:'SAY-f-ee ob-sur-VAY-shun',es:'Observación de seguridad',area:'Seguridad',level:'B1',example:'Submit a safety observation if you spot a risk.',context:'Seguridad'},
+  {id:'sec-09',en:'Emergency Stop',pron:'ee-MER-jen-see STOP',es:'Parada de emergencia',area:'Seguridad',level:'A1',example:'The emergency stop is at the end of the line.',context:'Seguridad'},
+  {id:'sec-10',en:'Risk Assessment',pron:'risk uh-SESS-ment',es:'Evaluación de riesgos',area:'Seguridad',level:'B1',example:'Complete the risk assessment before starting work.',context:'Seguridad'},
+
+  // Reuniones
+  {id:'mtg-01',en:'Agenda',pron:'AG-en-duh',es:'Agenda de la reunión',area:'Reuniones',level:'A1',example:'Please review the agenda before the meeting.',context:'Reuniones'},
+  {id:'mtg-02',en:'Action Items',pron:'AK-shun AI-tems',es:'Puntos de acción / Tareas pendientes',area:'Reuniones',level:'A2',example:'Who owns each action item from this meeting?',context:'Reuniones'},
+  {id:'mtg-03',en:'Follow-up',pron:'FOL-oh-up',es:'Seguimiento',area:'Reuniones',level:'A2',example:'I will follow up on the delivery schedule.',context:'Reuniones'},
+  {id:'mtg-04',en:'To Take Minutes',pron:'tuh TAYK MI-nits',es:'Tomar actas / acta de reunión',area:'Reuniones',level:'B1',example:'Maria is going to take minutes today.',context:'Reuniones'},
+  {id:'mtg-05',en:'To Loop In',pron:'too LOO-in',es:'Incluir / Poner al tanto',area:'Reuniones',level:'B1',example:'I need to loop in the quality department.',context:'Reuniones'},
+  {id:'mtg-06',en:'Stakeholder',pron:'STAYK-hohl-der',es:'Parte interesada',area:'Reuniones',level:'B1',example:'Every stakeholder needs to approve the plan.',context:'Reuniones'},
+  {id:'mtg-07',en:'Deliverable',pron:'di-LIV-er-uh-bul',es:'Entregable',area:'Reuniones',level:'B1',example:'The main deliverable is the audit report.',context:'Reuniones'},
+  {id:'mtg-08',en:'On Track',pron:'on TRAK',es:'En buen camino / En plazo',area:'Reuniones',level:'A2',example:'The project is on track for March delivery.',context:'Reuniones'},
+  {id:'mtg-09',en:'Behind Schedule',pron:'bih-HIND SKED-yool',es:'Atrasado / Fuera de plazo',area:'Reuniones',level:'A2',example:'We are behind schedule by two weeks.',context:'Reuniones'},
+  {id:'mtg-10',en:'To Escalate',pron:'es-KAY-layt',es:'Escalar un problema',area:'Reuniones',level:'B1',example:'If the issue persists, escalate to management.',context:'Reuniones'},
+
+  // Equipo y Personas
+  {id:'ppl-01',en:'Coaching',pron:'KOH-ching',es:'Capacitación / Coaching',area:'Equipo y Personas',level:'A2',example:'The supervisor does daily coaching on the line.',context:'Equipo y Personas'},
+  {id:'ppl-02',en:'Onboarding',pron:'ON-bord-ing',es:'Integración de nuevos colaboradores',area:'Equipo y Personas',level:'B1',example:'The onboarding program lasts two weeks.',context:'Equipo y Personas'},
+  {id:'ppl-03',en:'Appraisal',pron:'uh-PREY-zuhl',es:'Evaluación de desempeño',area:'Equipo y Personas',level:'B1',example:'The annual appraisal is next month.',context:'Equipo y Personas'},
+  {id:'ppl-04',en:'Performance Issue',pron:'per-FAWR-mis ISS-oo',es:'Problema de desempeño',area:'Equipo y Personas',level:'B1',example:'We need to address this performance issue.',context:'Equipo y Personas'},
+  {id:'ppl-05',en:'Headcount',pron:'HED-count',es:'Número de personal',area:'Equipo y Personas',level:'B1',example:'The headcount increased to 45 operators.',context:'Equipo y Personas'},
+  {id:'ppl-06',en:'Overtime',pron:'OH-ver-tyme',es:'Horas extras',area:'Equipo y Personas',level:'A2',example:'Overtime is authorized only for urgent orders.',context:'Equipo y Personas'},
+  {id:'ppl-07',en:'Shift Rotation',pron:'SHIFTroh-TAY-shun',es:'Rotación de turnos',area:'Equipo y Personas',level:'B1',example:'The shift rotation avoids fatigue accumulation.',context:'Equipo y Personas'},
+  {id:'ppl-08',en:'Skill Gap',pron:'SKILL gap',es:'Brecha de habilidades',area:'Equipo y Personas',level:'B1',example:'Training addresses the skill gap in welding.',context:'Equipo y Personas'},
+
+  // Calidad
+  {id:'qlty-01',en:'Defect',pron:'dih-FEKT',es:'Defecto',area:'Calidad',level:'A2',example:'The inspector found 3 defects in the batch.',context:'Calidad'},
+  {id:'qlty-02',en:'Tolerance',pron:'TOL-er-uhns',es:'Tolerancia',area:'Calidad',level:'B1',example:'The tolerance for this dimension is ±0.1 mm.',context:'Calidad'},
+  {id:'qlty-03',en:'Non-Conformance',pron:'nahn-kuhn-FOR-muhns',es:'No conformidad',area:'Calidad',level:'B1',example:'Non-conformance must be documented immediately.',context:'Calidad'},
+  {id:'qlty-04',en:'CAPA',pron:'KAP-uh',es:'Acción Correctiva y Preventiva',area:'Calidad',level:'B1',example:'The CAPA was submitted to quality for review.',context:'Calidad'},
+  {id:'qlty-05',en:'Calibration',pron:'kal-ih-BRAY-shun',es:'Calibración',area:'Calidad',level:'B1',example:'All instruments need calibration this month.',context:'Calidad'},
+  {id:'qlty-06',en:'Inspection',pron:'in-SPEK-shun',es:'Inspección',area:'Calidad',level:'A2',example:'In-process inspection catches defects early.',context:'Calidad'},
+  {id:'qlty-07',en:'Quality Claim',pron:'KWAL-uh-tiy klaym',es:'Reclamo de calidad',area:'Calidad',level:'B1',example:'The supplier filed a quality claim against us.',context:'Calidad'},
+  {id:'qlty-08',en:'Audit',pron:'AW-dit',es:'Auditoría',area:'Calidad',level:'A2',example:'The ISO audit is scheduled for next month.',context:'Calidad'},
+  {id:'qlty-09',en:'Corrective Action',pron:'kuh-REK-tiv AK-shun',es:'Acción correctiva',area:'Calidad',level:'A2',example:'Corrective action was implemented yesterday.',context:'Calidad'},
+  {id:'qlty-10',en:'Specification',pron:'speh-suh-FI-kay-shun',es:'Especificación',area:'Calidad',level:'B1',example:'The specification requires a surface roughness of Ra 1.6.',context:'Calidad'},
+
+  // Logística y Proveedores
+  {id:'log-01',en:'Lead Time',pron:'LEED taim',es:'Tiempo de entrega',area:'Logística y Proveedores',level:'A2',example:'The lead time for raw materials is 14 days.',context:'Logística y Proveedores'},
+  {id:'log-02',en:'Purchase Order',pron:'PUR-chus OR-der',es:'Orden de compra',area:'Logística y Proveedores',level:'A2',example:'The purchase order has been sent to the supplier.',context:'Logística y Proveedores'},
+  {id:'log-03',en:'Backorder',pron:'BAK-order',es:'Pedido pendiente',area:'Logística y Proveedores',level:'B1',example:'Three items are on backorder this week.',context:'Logística y Proveedores'},
+  {id:'log-04',en:'Quotation',pron:'kwoh-TAY-shun',es:'Cotización',area:'Logística y Proveedores',level:'A2',example:'We received a quotation from two suppliers.',context:'Logística y Proveedores'},
+  {id:'log-05',en:'Shipment',pron:'SHIP-ment',es:'Envío',area:'Logística y Proveedores',level:'A2',example:'The shipment arrives tomorrow by noon.',context:'Logística y Proveedores'},
+  {id:'log-06',en:'Customs',pron:'KAH-stuhmz',es:'Aduanas',area:'Logística y Proveedores',level:'A2',example:'Customs clearance may take 3 business days.',context:'Logística y Proveedores'},
+  {id:'log-07',en:'Quality Claim',pron:'KWAL-uh-tiy klaym',es:'Reclamo de calidad',area:'Logística y Proveedores',level:'B1',example:'We filed a quality claim for the defective parts.',context:'Logística y Proveedores'},
+  {id:'log-08',en:'Just-in-Time',pron:'jast-in-TYM',es:'Justo a tiempo',area:'Logística y Proveedores',level:'B1',example:'JIT delivery reduces warehouse costs.',context:'Logística y Proveedores'},
+  {id:'log-09',en:'Inventory',pron:'IN-vuhn-tor-ee',es:'Inventario',area:'Logística y Proveedores',level:'A2',example:'Inventory levels are above the safety stock.',context:'Logística y Proveedores'},
+  {id:'log-10',en:'Delivery Window',pron:'dih-LIV-uh-ree WIND-oh',es:'Ventana de entrega',area:'Logística y Proveedores',level:'B1',example:'The delivery window is 8 AM to 10 AM.',context:'Logística y Proveedores'},
+
+  // Números y Datos
+  {id:'num-01',en:'Increase',pron:'IN-krees',es:'Aumentar',area:'Números y Datos',level:'A1',example:'Production increased by 15% this quarter.',context:'Números y Datos'},
+  {id:'num-02',en:'Decrease',pron:'dih-KREES',es:'Disminuir',area:'Números y Datos',level:'A1',example:'The error rate decreased to 0.5%.',context:'Números y Datos'},
+  {id:'num-03',en:'Target',pron:'TAR-get',es:'Meta / Objetivo',area:'Números y Datos',level:'A1',example:'The daily target is 500 units.',context:'Números y Datos'},
+  {id:'num-04',en:'Forecast',pron:'FAWR-kast',es:'Pronóstico',area:'Números y Datos',level:'B1',example:'The forecast predicts higher demand in Q3.',context:'Números y Datos'},
+  {id:'num-05',en:'Average',pron:'AV-er-ij',es:'Promedio',area:'Números y Datos',level:'A2',example:'The average cycle time is 42 seconds.',context:'Números y Datos'},
+  {id:'num-06',en:'Gap',pron:'gap',es:'Brecha / Diferencia',area:'Números y Datos',level:'A2',example:'There is a 5-point gap versus the target.',context:'Números y Datos'},
+  {id:'num-07',en:'Breakdown',pron:'BREYK-doun',es:'Desglose / Descomposición',area:'Números y Datos',level:'B1',example:'Here is the breakdown of defects by category.',context:'Números y Datos'},
+  {id:'num-08',en:'Rate',pron:'rayt',es:'Tasa / Velocidad',area:'Números y Datos',level:'A1',example:'The defect rate must stay below 1%.',context:'Números y Datos'},
+  {id:'num-09',en:'Trend',pron:'trennd',es:'Tendencia',area:'Números y Datos',level:'B1',example:'The trend shows improvement since June.',context:'Números y Datos'},
+  {id:'num-10',en:'Baseline',pron:'BAYSL-in',es:'Línea base de referencia',area:'Números y Datos',level:'B1',example:'Use last quarter as the baseline for comparison.',context:'Números y Datos'},
+
+  // Verbos de Gestión
+  {id:'verb-01',en:'To Schedule',pron:'to SKED-yool',es:'Programar',area:'Verbos de Gestión',level:'A2',example:'We need to schedule the maintenance for Saturday.',context:'Verbos de Gestión'},
+  {id:'verb-02',en:'To Allocate',pron:'to AL-uh-kayt',es:'Asignar / Distribuir',area:'Verbos de Gestión',level:'B1',example:'Resources were allocated to the priority line.',context:'Verbos de Gestión'},
+  {id:'verb-03',en:'To Escalate',pron:'es-KAY-layt',es:'Escalar / Elevar',area:'Verbos de Gestión',level:'B1',example:'Escalate the issue to the plant manager.',context:'Verbos de Gestión'},
+  {id:'verb-04',en:'To Roll Out',pron:'to ROLL out',es:'Implementar / Lanzar',area:'Verbos de Gestión',level:'B1',example:'The new procedure will roll out next month.',context:'Verbos de Gestión'},
+  {id:'verb-05',en:'To Ramp Up',pron:'to ramp UP',es:'Aumentar la producción gradualmente',area:'Verbos de Gestión',level:'B1',example:'We ramped up production to meet demand.',context:'Verbos de Gestión'},
+  {id:'verb-06',en:'To Streamline',pron:'to STREEM-lin',es:'Optimizar / Simplificar',area:'Verbos de Gestión',level:'B1',example:'The goal is to streamline the approval process.',context:'Verbos de Gestión'},
+  {id:'verb-07',en:'To Troubleshoot',pron:'to TRUB-ul-shoot',es:'Diagnosticar / Resolver problemas',area:'Verbos de Gestión',level:'B1',example:'The technician was troubleshooting the press.',context:'Verbos de Gestión'},
+  {id:'verb-08',en:'To Benchmark',pron:'to BENCH-mark',es:'Comparar con referencia',area:'Verbos de Gestión',level:'B1',example:'We benchmarked our OEE against industry standards.',context:'Verbos de Gestión'},
+
+  // Phrasal Verbs
+  {id:'pv-01',en:'Carry Out',pron:'KAIR out',es:'Realizar / Ejecutar',area:'Phrasal Verbs',level:'A2',example:'We carry out inspections every shift.',context:'Phrasal Verbs'},
+  {id:'pv-02',en:'Set Up',pron:'set UP',es:'Configurar / Preparar',area:'Phrasal Verbs',level:'A2',example:'It takes 30 minutes to set up the machine.',context:'Phrasal Verbs'},
+  {id:'pv-03',en:'Sort Out',pron:'SORT out',es:'Resolver / Ordenar',area:'Phrasal Verbs',level:'B1',example:'We need to sort out the scheduling conflict.',context:'Phrasal Verbs'},
+  {id:'pv-04',en:'Cut Down',pron:'kat DOWN',es:'Reducir',area:'Phrasal Verbs',level:'B1',example:'We must cut down on scrap material.',context:'Phrasal Verbs'},
+  {id:'pv-05',en:'Follow Up',pron:'FOL-oh-up',es:'Hacer seguimiento',area:'Phrasal Verbs',level:'A2',example:'I will follow up with the supplier tomorrow.',context:'Phrasal Verbs'},
+  {id:'pv-06',en:'Bring Up',pron:'BRING up',es:'Mencionar / Plantear un tema',area:'Phrasal Verbs',level:'B1',example:'I want to bring up the safety concern.',context:'Phrasal Verbs'},
+  {id:'pv-07',en:'Look Into',pron:'look IN-to',es:'Investigar',area:'Phrasal Verbs',level:'B1',example:'Let me look into the production delay.',context:'Phrasal Verbs'},
+
+  // Expresiones de Reunión
+  {id:'exp-01',en:"I'd like to",pron:"I dee LYE-tuh",es:'Me gustaría / Quiero',area:'Expresiones de Reunión',level:'A2',example:"I'd like to discuss the output numbers.",context:'Expresiones de Reunión'},
+  {id:'exp-02',en:'In my opinion',pron:'in my uh-PIE-nyun',es:'En mi opinión',area:'Expresiones de Reunión',level:'A2',example:"In my opinion, the line needs more staffing.",context:'Expresiones de Reunión'},
+  {id:'exp-03',en:'Could you clarify',pron:'KUD yoo KLAR-uh-fy',es:'¿Podría aclarar?',area:'Expresiones de Reunión',level:'A2',example:"Could you clarify the tolerance range?",context:'Expresiones de Reunión'},
+  {id:'exp-04',en:"Let's park that",pron:"lets PAHNK that",es:'Dejemos eso para después',area:'Expresiones de Reunión',level:'B1',example:"That's important but let's park it for now.",context:'Expresiones de Reunión'},
+  {id:'exp-05',en:'Moving on',pron:'MOO-ving on',es:'Continuando / Pasando al siguiente punto',area:'Expresiones de Reunión',level:'A2',example:'Moving on to the next agenda item.',context:'Expresiones de Reunión'},
+  {id:'exp-06',en:'To Sum Up',pron:'tuh SUM up',es:'Resumir',area:'Expresiones de Reunión',level:'A2',example:"To sum up, we need action by Friday.",context:'Expresiones de Reunión'},
+  {id:'exp-07',en:'That makes sense',pron:'that MEYKSS sens',es:'Eso tiene sentido',area:'Expresiones de Reunión',level:'A2',example:"That makes sense. I will implement it.",context:'Expresiones de Reunión'},
+  {id:'exp-08',en:'To Wrap Up',pron:'tuh RAP up',es:'Concluir / Resumir al final',area:'Expresiones de Reunión',level:'B1',example:'Let us wrap up with the action items.',context:'Expresiones de Reunión'},
+  {id:'exp-09',en:'I would suggest',pron:'ai WOOD suh-JEST',es:'Sugeriría',area:'Expresiones de Reunión',level:'B1',example:'I would suggest reviewing the data first.',context:'Expresiones de Reunión'},
+  {id:'exp-10',en:'Can we take this offline',pron:'kan we mayk this of-line',es:'Podemos tratar esto aparte',area:'Expresiones de Reunión',level:'B1',example:"Can we take this offline? It's a detailed topic.",context:'Expresiones de Reunión'},
+];
+
+// ============================================
+// DESAFÍOS DE HABLA (30+)
+// ============================================
+const SPEAKING_CHALLENGES = [
+  {id:'sc-01',en:'Explain your role in the production team.',level:'A1',area:'General'},
+  {id:'sc-02',en:'What safety rules do you follow every day?',level:'A1',area:'Seguridad'},
+  {id:'sc-03',en:'Describe your typical work shift.',level:'A1',area:'Fábrica'},
+  {id:'sc-04',en:'What do you do when a machine stops unexpectedly?',level:'A1',area:'Fábrica'},
+  {id:'sc-05',en:'Explain the difference between planned and unplanned downtime.',level:'A2',area:'Fábrica'},
+  {id:'sc-06',en:'Describe what OEE means and why it matters.',level:'A2',area:'Fábrica'},
+  {id:'sc-07',en:'How do you handle a near miss in your area?',level:'A2',area:'Seguridad'},
+  {id:'sc-08',en:'Walk through the lockout/tagout procedure in your own words.',level:'B1',area:'Seguridad'},
+  {id:'sc-09',en:'Explain what a bottleneck is and give an example from your plant.',level:'A2',area:'Fábrica'},
+  {id:'sc-10',en:'How do you prioritize tasks when multiple issues arise?',level:'B1',area:'General'},
+  {id:'sc-11',en:'Describe a time you solved a production problem.',level:'B1',area:'Fábrica'},
+  {id:'sc-12',en:'What is the difference between preventive and corrective maintenance?',level:'B1',area:'Fábrica'},
+  {id:'sc-13',en:'Explain the concept of takt time to a new operator.',level:'B1',area:'Fábrica'},
+  {id:'sc-14',en:'What does a safety briefing typically include?',level:'A2',area:'Seguridad'},
+  {id:'sc-15',en:'How do you report an incident? Describe the process.',level:'A2',area:'Seguridad'},
+  {id:'sc-16',en:'Describe the steps to escalate a quality problem.',level:'B1',area:'Calidad'},
+  {id:'sc-17',en:'What is a non-conformance and how do you handle it?',level:'B1',area:'Calidad'},
+  {id:'sc-18',en:'Explain the difference between accuracy and precision.',level:'B1',area:'Calidad'},
+  {id:'sc-19',en:'How do you negotiate delivery terms with a supplier?',level:'B1',area:'Logística'},
+  {id:'sc-20',en:'Describe what happens during a shipment inspection.',level:'B1',area:'Logística'},
+  {id:'sc-21',en:'What key numbers do you review in your daily production report?',level:'A2',area:'Números'},
+  {id:'sc-22',en:'Explain how to calculate scrap rate.',level:'B1',area:'Fábrica'},
+  {id:'sc-23',en:'Describe the onboarding process for a new operator.',level:'B1',area:'Equipo'},
+  {id:'sc-24',en:'How do you give constructive feedback to an underperforming team member?',level:'B1',area:'Equipo'},
+  {id:'sc-25',en:'What questions do you ask during a technical interview for a production role?',level:'B1',area:'Equipo'},
+  {id:'sc-26',en:'How would you present last month\'s results to the general manager?',level:'B1',area:'Reuniones'},
+  {id:'sc-27',en:'Role-play: you need to ask for a meeting with the plant director. What do you say?',level:'A2',area:'Reuniones'},
+  {id:'sc-28',en:'How do you brief a new team member on emergency procedures?',level:'A2',area:'Seguridad'},
+  {id:'sc-29',en:'Explain what root cause analysis involves.',level:'B1',area:'Fábrica'},
+  {id:'sc-30',en:'What\'s the difference between lead time and cycle time?',level:'A2',area:'Logística'},
+  {id:'sc-31',en:'How do you handle a supplier who delivers defective parts repeatedly?',level:'B1',area:'Logística'},
+  {id:'sc-32',en:'Describe how you would set up a new production line from scratch.',level:'B1',area:'Fábrica'},
+  {id:'sc-33',en:'Explain the importance of calibration in a quality system.',level:'B1',area:'Calidad'},
+  {id:'sc-34',en:'What does it mean when a project is "behind schedule"?',level:'A2',area:'Reuniones'},
+  {id:'sc-35',en:'How do you conduct a daily production huddle?',level:'A2',area:'General'},
+  {id:'sc-36',en:'What would you say to motivate the team after a tough week?',level:'B1',area:'Equipo'},
+  {id:'sc-37',en:'Explain the concept of continuous improvement in your own words.',level:'B1',area:'General'},
+  {id:'sc-38',en:'How do you handle a conflict between production speed and quality?',level:'B1',area:'Fábrica'},
+  {id:'sc-39',en:'Describe the process for filing a quality claim against a supplier.',level:'B1',area:'Logística'},
+  {id:'sc-40',en:'What is the difference between throughput and capacity?',level:'B1',area:'Fábrica'},
+];
+
+// ============================================
+// ROLE PLAYS (8 escenarios)
+// ============================================
+const ROLE_PLAYS = [
+  {
+    id:'rp-01', title:'Daily Production Meeting', icon:'📋',
+    context:'Estás reportando los resultados de tu turno en la reunión de producción matutina.',
+    steps:[
+      {title:'Opening',text:'Start with a brief summary: "Good morning. Here is the production update for my shift."'},
+      {title:'Output',text:'Report the numbers: "We produced X units with a yield of Y%. The throughput was Z units per hour."'},
+      {title:'Issues',text:'Mention any downtime or problems: "We had unplanned downtime of A minutes due to B."'},
+      {title:'Action Items',text:'Close with what you need: "I need maintenance to check C by tomorrow. Any questions?"'},
+    ],
+    phrases:['Good morning, here is the shift report.','We produced about 1,200 units.','Yield was at 94%.','Throughput averaged 85 units per hour.','We had 20 minutes of unplanned downtime.','The issue was a jam in station 3.','I would like maintenance to inspect the press.','I think we are on track for today\'s target.'],
+    vocab:['Output','Yield','Throughput','Downtime','Unplanned','On track','Target','Shift report','Maintenance'],
+    prompt:'Tell the meeting what your shift produced, any problems, and what you need.'
+  },
+  {
+    id:'rp-02', title:'KPI Deviation Explanation', icon:'📉',
+    context:'Tu jefe te pregunta por qué el OEE bajó esta semana. Debes explicar las causas y las acciones.',
+    steps:[
+      {title:'Acknowledge',text:'Acknowledge the drop: "Yes, our OEE dropped from 88% to 79% this week."'},
+      {title:'Root Cause',text:'Explain the root cause: "The main reason was a bottleneck at the packaging station."'},
+      {title:'Data',text:'Support with data: "Scrap rate increased by 3% and we had 4 hours of unplanned downtime."'},
+      {title:'Action',text:'Present the solution: "We are adjusting the line balance and retraining operators. We expect recovery by Thursday."'},
+    ],
+    phrases:['The OEE dropped by 9 points this week.','The main bottleneck is the packaging station.','We had increased scrap and some unplanned downtime.','Root cause analysis points to a worn conveyor belt.','We are taking corrective action immediately.','We expect the OEE to recover to 85% by Thursday.'],
+    vocab:['OEE','Bottleneck','Root cause','Corrective action','Unplanned downtime','Scrap rate','Line balance','Recovery','Throughput'],
+    prompt:'Explain why the OEE dropped and what you are doing to fix it.'
+  },
+  {
+    id:'rp-03', title:'Safety Briefing / Toolbox Talk', icon:'🦺',
+    context:'Lideras un breafing de seguridad de 5 minutos para tu equipo antes de iniciar el turno.',
+    steps:[
+      {title:'Greeting',text:'"Good morning everyone. Let us start with our toolbox talk. Today we focus on electrical safety."'},
+      {title:'Risk',text:'Identify the risk: "The main hazard this week is working near energized equipment during maintenance."'},
+      {title:'Procedure',text:'Explain the lockout/tagout procedure: "Always verify zero energy state before touching any wiring."'},
+      {title:'Close',text:'End with a question: "Does anyone have questions? Remember: if you are not sure, stop and ask."'},
+    ],
+    phrases:['Good morning, let us start with our safety talk.','The hazard this week is working near energized equipment.','Remember to follow lockout/tagout before any repair.','Always verify zero energy state.','If you are unsure about something, stop immediately.','Does anyone have questions or concerns?'],
+    vocab:['Hazard','Lockout/Tagout','Energized equipment','Zero energy state','Lockout','Tagout','PPE','Safety protocol','Toolbox talk','Electrical safety'],
+    prompt:'Conduct a 5-minute safety briefing on electrical safety for your team.'
+  },
+  {
+    id:'rp-04', title:'Receiving an ISO 9001 Auditor', icon:'🔍',
+    context:'Un auditor de certificación ISO 9001 llega a tu planta. Debes guiarlo y responder sus preguntas.',
+    steps:[
+      {title:'Welcome',text:'"Welcome. I am the production manager. Let me walk you through our quality system."'},
+      {title:'Documents',text:'Show the documents: "We have documented procedures for every critical process, available in the QM folder."'},
+      {title:'Evidence',text:'Provide evidence: "Here is the last internal audit report and the corrective action log."'},
+      {title:'Questions',text:'Handle questions: "Please note any non-conformities. We will address them within 48 hours."'},
+    ],
+    phrases:['Welcome to our facility. I am the production manager.','We follow ISO 9001:2015 for our quality management system.','Here is the documented procedure for this process.','We conduct internal audits quarterly.','We have a corrective action system for non-conformities.','Please let me know if you need any additional information.'],
+    vocab:['Auditor','ISO 9001','Non-conformity','Corrective action','Documented procedure','Quality management','Internal audit','Certification','Evidence','Traceability'],
+    prompt:'Guide an ISO 9001 auditor through your quality system and answer their questions.'
+  },
+  {
+    id:'rp-05', title:'Difficult Supplier Call', icon:'📞',
+    context:'Llamas a un proveedor porque las piezas que recibiste tienen defectos y el pedido está atrasado.',
+    steps:[
+      {title:'State the issue',text:'"Hello, I am calling about order PO-4420. We received a quality issue with the delivered components."'},
+      {title:'Be specific',text:'Describe the problem: "15% of the parts are out of tolerance on the bore diameter."'},
+      {title:'Request action',text:'Ask for resolution: "I need a replacement shipment by Wednesday. Also, please provide a CAPA for this defect."'},
+      {title:'Confirm',text:'Confirm next steps: "Can you confirm the replacement ETA and send me the CAPA document by email?"'},
+    ],
+    phrases:['I am calling about purchase order PO-4420.','We found a quality issue: 15% of the parts are out of tolerance.','We need a replacement shipment by Wednesday at the latest.','Please provide a corrective action plan for this defect.','Can you confirm the ETA and send documentation by email?','This is affecting our production schedule, so I need a fast response.'],
+    vocab:['Purchase order','Tolerance','CAPA','Replacement','Defect','Shipment ETA','Quality issue','Out of tolerance','Corrective action','Supplier'],
+    prompt:'Call a supplier about defective parts and a delayed replacement. Be firm but professional.'
+  },
+  {
+    id:'rp-06', title:'Technical Interview in English', icon:'💼',
+    context:'Estás en una entrevista para un puesto de supervisor de producción en una empresa internacional.',
+    steps:[
+      {title:'Introduction',text:'"My name is Carlos. I have 15 years of experience in production management at a manufacturing plant in Ecuador."'},
+      {title:'Experience',text:'Talk about your strengths: "I have led teams of 20 operators, reduced downtime by 18%, and implemented 5S successfully."'},
+      {title:'Problem solving',text:'Give an example: "When our OEE dropped, I did a root cause analysis and improved maintenance scheduling, which raised OEE by 12 points."'},
+      {title:'Closing',text:'"I am excited about this role and confident I can contribute to the team. Do you have any questions for me?"'},
+    ],
+    phrases:['I have 15 years of experience in production management.','I have led teams of 20 operators.','I reduced unplanned downtime by 18%.','I implemented 5S and visual management.','When our OEE dropped, I conducted a root cause analysis.','I am confident I can add value to your team.'],
+    vocab:['Production management','Team leader','Unplanned downtime','OEE','Root cause analysis','5S','Visual management','Continuous improvement','Supervisor','Interview'],
+    prompt:'You are in a job interview. Introduce yourself and describe your key achievements in production management.'
+  },
+  {
+    id:'rp-07', title:'Monthly Results to the General Manager', icon:'📊',
+    context:'Presentas los resultados mensuales de producción al gerente general de la planta.',
+    steps:[
+      {title:'Overview',text:'"Good morning. Here is the monthly production summary for July. Overall output met the target at 96%."'},
+      {title:'Key metrics',text:'Present KPIs: "OEE averaged 84%, up from 79% last month. Scrap rate decreased to 1.2%. Safety incidents: zero."'},
+      {title:'Challenges',text:'Mention challenges: "We faced a 3-day stoppage due to a compressor failure, which impacted throughput by 8%."'},
+      {title:'Next month',text:'Propose actions: "For August, I propose preventive maintenance on all compressors and additional training for night shift. Target OEE: 87%."'},
+    ],
+    phrases:['Good morning, here is the monthly production summary.','Overall output was at 96% of the target.','OEE averaged 84%, up from 79% last month.','Scrap rate decreased to 1.2%.','We had zero safety incidents this month.','For August, I propose preventive maintenance on all compressors.','My target for next month is an OEE of 87%.'],
+    vocab:['Monthly summary','Output','Target','OEE','Scrap rate','Safety incidents','Throughput','Preventive maintenance','Propose','Action plan','KPI'],
+    prompt:'Present monthly production results to the general manager with key metrics and next steps.'
+  },
+  {
+    id:'rp-08', title:'Training a New Operator', icon:'🎓',
+    context:'Estás instruyendo a un operario nuevo en su primer día en la línea de producción.',
+    steps:[
+      {title:'Welcome',text:'"Welcome to the team. I am your supervisor. Today I will walk you through the main process."'},
+      {title:'Safety first',text:'"Before we start, remember: PPE is mandatory at all times. Know where the emergency stops are."'},
+      {title:'Show the process',text:'Demonstrate: "First, check the work order. Then set up the machine according to the setup sheet."'},
+      {title:'Practice and check',text:'"Now you try. I will observe and give feedback. Ask me anything at any time."'},
+    ],
+    phrases:['Welcome to the team. I am your production supervisor.','Safety is our top priority. PPE is mandatory here.','Know where the emergency stop buttons are on this machine.','First, check the work order number.','Set up the machine following the setup sheet.','Now it is your turn. Let me know if anything is unclear.','Good job. Keep it up and do not hesitate to ask questions.'],
+    vocab:['Work order','Setup sheet','PPE','Emergency stop','Supervisor','Demonstrate','Feedback','Training','Onboarding','New operator','Standard operating procedure'],
+    prompt:'Train a new operator on the production process for their first day.'
+  },
+];
+
+// ============================================
+// DIAGNÓSTICO ONBOARDING (12 preguntas)
+// ============================================
+const DIAGNOSTIC = [
+  {q:'If you read an English instruction manual, how well do you understand it?',opts:[{t:'Very well, I understand most words',v:4},{t:'I understand the general idea',v:3},{t:'I understand only common words',v:2},{t:'I can barely understand any of it',v:1}]},
+  {q:'How confident are you speaking English in a meeting?',opts:[{t:'Very confident, I can lead the discussion',v:4},{t:'I can participate but hesitate',v:3},{t:'I only understand what others say',v:2},{t:'I stay silent and do not speak',v:1}]},
+  {q:'Can you understand an English safety briefing?',opts:[{t:'Yes, without difficulty',v:4},{t:'Mostly, with some effort',v:3},{t:'I understand the main words only',v:2},{t:'No, I do not understand it',v:1}]},
+  {q:'When you hear a native English speaker in a meeting, how much do you understand?',opts:[{t:'Almost everything',v:4},{t:'About half, with some effort',v:3},{t:'A little, key words only',v:2},{t:'Almost nothing',v:1}]},
+  {q:'How would you rate your English vocabulary for work?',opts:[{t:'I have a wide range of work terms',v:4},{t:'I know basic work vocabulary',v:3},{t:'I know only very basic words',v:2},{t:'I do not know work-related English',v:1}]},
+  {q:'Can you write a simple email in English?',opts:[{t:'Yes, comfortably',v:4},{t:'Yes, but with a dictionary or translation',v:3},{t:'Only with help or templates',v:2},{t:'I cannot write in English at all',v:1}]},
+  {q:'How do you feel when you need to speak English at work?',opts:[{t:'Confident, I can express ideas',v:4},{t:'Nervous but I manage',v:3},{t:'Anxious, I avoid speaking',v:2},{t:'Panicked, I freeze',v:1}]},
+  {q:'You receive an English message from an English-speaking supplier. You can...',opts:[{t:'Read and reply without help',v:4},{t:'Read it but need help to reply',v:3},{t:'Understand only the main points',v:2},{t:'Cannot understand it at all',v:1}]},
+  {q:'You need to explain a production problem to an English-speaking visitor. You would...',opts:[{t:'Explain it clearly in English',v:4},{t:'Explain with simple words and gestures',v:3},{t:'Use a translator or ask a colleague',v:2},{t:'Avoid the conversation entirely',v:1}]},
+  {q:'You understand the English word "throughput" because...',opts:[{t:'I know it from work',v:4},{t:'I have seen it before in a manual',v:3},{t:'I can guess it means production speed',v:2},{t:'I have no idea what it means',v:1}]},
+  {q:'How many English technical words related to your work can you understand?',opts:[{t:'20 or more',v:4},{t:'10 to 19',v:3},{t:'5 to 9',v:2},{t:'4 or fewer',v:1}]},
+  {q:'If you had an English-speaking supervisor tomorrow, you would...',opts:[{t:'Communicate effectively with some effort',v:4},{t:'Communicate with difficulty',v:3},{t:'Struggle to communicate',v:2},{t:'Not be able to communicate at all',v:1}]},
+];
+
+// ============================================
+// SONIDOS QUE NOS DELATAN (pronunciación)
+// ============================================
+const PRON_PAIRS = [
+  {pair:'think / three',en1:'think',en2:'three',note:'The "th" in think is unvoiced (no vibration). The "th" in three is voiced.'},
+  {pair:'the / this',en1:'the',en2:'this',note:'The "th" in the and this is voiced. Touch your throat to feel the vibration.'},
+  {pair:'ship / sheep',en1:'ship',en2:'sheep',note:'Ship has a short /ɪ/. Sheep has a long /iː/. Hold the vowel a bit longer for sheep.'},
+  {pair:'hat / cat',en1:'hat',en2:'cat',note:'Both use /æ/ (the "a" in cat). Open your mouth wide. It does not exist in Spanish.'},
+  {pair:'vet / bet',en1:'vet',en2:'bet',note:'V is voiced (vibration), B is unvoiced. Put your hand on your throat to feel the difference.'},
+  {pair:'pass / past',en1:'pass',en2:'past',note:'The final -s in "pass" is /s/. The -t in "past" must be fully pronounced, not softened.'},
+  {pair:'asked / past',en1:'asked',en2:'past',note:'The -ed ending is /t/ after a voiceless sound (k, s, f, p, t). Do not add a vowel.'},
+  {pair:'I would like to',en1:"I'd like to",en2:"(contract: I\'d like tuh)",note:'Native speakers link words: "I would like to" becomes "I\'d like tuh." Practice the link.'},
+  {pair:'going to → gonna',en1:'going to',en2:'gonna',note:'"Going to" is almost always contracted to "gonna" in natural speech.'},
+  {pair:'want to → wanna',en1:'want to',en2:'wanna',note:'"Want to" contracts to "wanna" in fast, natural English.'},
+];
+
+// ============================================
+// PLAN DE 12 SEMANAS
+// ============================================
+const WEEKLY_PLAN = [
+  {week:1,title:'Reactivación',goal:'Vocabulario básico de la planta (nombres de máquinas, herramientas, materiales). Aprende 10 palabras nuevas.',focus:'Fábrica y Procesos'},
+  {week:2,title:'Frases de trabajo',goal:'Completar oraciones simples del día a día: "I need the...", "The machine is...", "The shift report shows...".',focus:'Fábrica y Procesos'},
+  {week:3,title:'Reuniones básicas',goal:'Entender y usar frases de reunión: agenda, action items, follow-up. Participar con preguntas cortas.',focus:'Reuniones'},
+  {week:4,title:'Seguridad primero',goal:'Entender y comunicar protocolos de seguridad en inglés: PPE, lockout/tagout, near miss, hazard.',focus:'Seguridad'},
+  {week:5,title:'Números y métricas',goal:'Explicar números de producción: yield, scrap rate, throughput, OEE, cycle time, takt time.',focus:'Números y Datos'},
+  {week:6,title:'Calidad',goal:'Entender defect, tolerance, non-conformance, CAPA, inspection. Reconocer y explicar problemas de calidad.',focus:'Calidad'},
+  {week:7,title:'Logística y proveedores',goal:'Hablar de lead time, purchase order, shipment, backorder. Comunicar problemas de suministro.',focus:'Logística y Proveedores'},
+  {week:8,title:'Producción oral I',goal:'Practicar 10 retos de habla del mundo laboral. Grabarte y escucharte. Enfocarte en claridad, no en perfección.',focus:'Producción oral'},
+  {week:9,title:'Equipo y personas',goal:'Vocabulary: coaching, onboarding, headcount, appraisal, performance issue. Describir equipos y roles.',focus:'Equipo y Personas'},
+  {week:10,title:'Role plays I',goal:'Completar los primeros 4 role plays: meeting, KPI, safety briefing, ISO auditor.',focus:'Role Plays'},
+  {week:11,title:'Role plays II',goal:'Completar los últimos 4 role plays: proveedor difícil, entrevista, resultados mensuales, operario nuevo.',focus:'Role Plays'},
+  {week:12,title:'Fluidez en reuniones',goal:'Repaso total. Simulación de reunión completa en inglés con 3-4 compañeros (imaginarios). Cierre del programa.',focus:'Integración'},
+];
+
+// ============================================
+// ESTADO DE LA APLICACIÓN
+// ============================================
+let state = null;
+
+function getDefaultState(){
+  return {
+    version: STATE_VERSION,
+    user:{ level:null, dailyGoal:15, practiceHour:19, onboardingComplete:false, name:'' },
+    srs:{}, // cardId -> {ease, interval, reps, nextReview, lastQuality}
+    progress:{ xp:0, level:1, streak:0, lastPracticeDate:null, graceUsed:false, sessionsCompleted:0, totalMinutes:0, heatmap:{}, speakingScores:{}, masteryCount:0 },
+    dailySession:{ date:null, blocksCompleted:{}, activeBlock:0, quickSession:false, topic:'' },
+    completedRolePlays:[],
+    dailyTopics:[
+      {key:'production',en:'Production Metrics',blocks:{warmup:['Our target for today is 95% yield.','The throughput is measured per hour.','The OEE goal for this shift is 85%.'],words:['throughput','yield','target','output','efficiency'],structure:'The OEE is calculated by multiplying availability, performance, and quality.'},quiz:['What does OEE measure?','What is throughput?','Name one type of downtime.','What is a target?']},
+      {key:'safety',en:'Workplace Safety',blocks:{warmup:['PPE must be worn at all times in the production area.','The emergency stop is at the end of every line.','A near miss must be reported immediately.','Lockout/tagout protects workers during maintenance.'],words:['PPE','hazard','near miss','lockout','safety briefing'],structure:'Before any repair, apply lockout and tagout to the energy source.'},quiz:['What does PPE stand for?','What is a near miss?','When do you use lockout/tagout?','What is a safety briefing?']},
+      {key:'meetings',en:'Meeting Skills',blocks:{warmup:['Let us start with the agenda for today.','The action items from last meeting are still open.','I would like to follow up on the shipment delay.','To sum up, we need the report by Friday.'],words:['agenda','action item','follow-up','deliverable','stakeholder'],structure:'The agenda includes the topics we will discuss and the time for each.'},quiz:['What is an agenda?','What are action items?','What does follow-up mean?','Name one meeting phrase.']},
+      {key:'quality',en:'Quality Control',blocks:{warmup:['The defect rate must stay below 1%.','We need to calibrate the gauge before starting.','A non-conformance requires a CAPA document.','The inspection found two dimensional errors.'],words:['defect','tolerance','calibration','inspection','CAPA'],structure:'Any non-conformance found during inspection triggers a corrective action.'},quiz:['What is a defect?','What is tolerance?','What does CAPA stand for?','When do you need calibration?']},
+      {key:'logistics',en:'Supply Chain & Logistics',blocks:{warmup:['The lead time for raw materials is 14 days.','The purchase order has been sent to the supplier.','We have three items on backorder this week.','The shipment arrives tomorrow by noon.'],words:['lead time','purchase order','backorder','shipment','customs'],structure:'A purchase order includes the item, quantity, lead time, and delivery date.'},quiz:['What is lead time?','What is a purchase order?','What does backorder mean?','What is customs clearance?']},
+    ]
+  };
+}
+
+// --- Persistencia ---
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    if(!parsed || parsed.version !== STATE_VERSION) return null;
+    return parsed;
+  }catch(e){ return null; }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+// ============================================
+// MOTOR SRS (SM-2 Simplificado)
+// ============================================
+function getCardState(cardId){
+  if(!state.srs[cardId]){
+    state.srs[cardId] = {ease:2.5, interval:0, reps:0, nextReview:0, lastQuality:-1};
+  }
+  return state.srs[cardId];
+}
+
+function reviewCard(cardId, quality){
+  // quality: 0=Otra vez, 1=Difícil, 2=Bien, 3=Fácil
+  const s = getCardState(cardId);
+  if(quality === 0 || quality === 1){
+    // Otra vez o Difícil: resetear
+    s.reps = 0;
+    s.interval = quality === 0 ? 1 : 1; // 1 día para ambos
+    s.ease = Math.max(1.3, s.ease - 0.2);
+  } else {
+    // Bien o Fácil: aumentar intervalo
+    if(s.reps < 1){
+      s.interval = quality === 2 ? 1 : 1;
+    } else {
+      s.interval = Math.round(s.interval * s.ease);
+      if(quality === 3) s.interval = Math.round(s.interval * 1.3); // bonus fácil
+    }
+    s.reps += 1;
+    if(quality === 3){
+      s.ease = Math.min(4.0, s.ease + 0.1);
+    }
+  }
+  s.lastQuality = quality;
+  // nextReview = hoy + intervalo días
+  const today = new Date();
+  today.setDate(today.getDate() + s.interval);
+  s.nextReview = today.toISOString().slice(0,10);
+  saveState();
+  return s;
+}
+
+function getDueCards(){
+  const due = [];
+  const today = TODAY;
+  VOCABULARY.forEach(card => {
+    const s = getCardState(card.id);
+    if(s.nextReview <= today && s.interval > 0) due.push(card);
+    // Cards con intervalo 0 (nunca revisadas) también deben aparecer en repaso si hay tiempo
+    if(s.interval === 0 && s.reps === 0) due.push(card);
+  });
+  // Priorizar por fecha más próxima
+  due.sort((a,b) => {
+    const sa = getCardState(a.id), sb = getCardState(b.id);
+    return sa.nextReview.localeCompare(sb.nextReview);
+  });
+  return due;
+}
+
+function getMasteredCards(){
+  return VOCABULARY.filter(c => {
+    const s = getCardState(c.id);
+    return s.interval >= 21 && s.reps >= 3;
+  });
+}
+
+function getLearningCards(){
+  return VOCABULARY.filter(c => {
+    const s = getCardState(c.id);
+    return s.interval < 21 || s.reps < 1;
+  });
+}
+
+// ============================================
+// API DE VOZ (TTS + SpeechRecognition)
+// ============================================
+const SpeechAPI = {
+  synthesis: null,
+  recognition: null,
+  supportsRecognition: false,
+  supportsRecording: false,
+  recorder: null,
+  audioChunks: [],
+  mediaStream: null,
+
+  init(){
+    this.synthesis = window.speechSynthesis;
+    // Intentar encontrar voz en inglés
+    if(this.synthesis){
+      // Cargar voces (asíncrono, algunas necesitan tiempo)
+      this.voices = this.synthesis.getVoices();
+      this.synthesis.onvoiceschanged = () => { this.voices = this.synthesis.getVoices(); };
+    }
+    // SpeechRecognition
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(SR){
+      this.supportsRecognition = true;
+      this.recognition = new SR();
+      this.recognition.lang = 'en-US';
+      this.recognition.continuous = false;
+      this.recognition.interimResults = false;
+    }
+    // MediaRecorder
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+      this.supportsRecording = true;
+    }
+  },
+
+  // Obtener mejor voz en inglés
+  getEnglishVoice(){
+    if(!this.voices) return null;
+    // Preferir en-US, luego en-GB, luego cualquier en-
+    return this.voices.find(v => v.lang.startsWith('en-US'))
+      || this.voices.find(v => v.lang.startsWith('en-GB'))
+      || this.voices.find(v => v.lang.startsWith('en'))
+      || null;
+  },
+
+  // Leer texto en voz alta
+  speak(text, callback){
+    if(!this.synthesis) return;
+    // Cancelar habla anterior
+    this.synthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'en-US';
+    utt.rate = 0.85; // más lento para estudiantes
+    utt.pitch = 1;
+    const voice = this.getEnglishVoice();
+    if(voice) utt.voice = voice;
+    utt.onend = callback || null;
+    this.synthesis.speak(utt);
+  },
+
+  // Escuchar y transcribir
+  listen(callback){
+    if(!this.supportsRecognition || !this.recognition){
+      callback(null, false); // no soportado
+      return;
+    }
+    this.recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      callback(transcript, true);
+    };
+    this.recognition.onerror = () => {
+      callback(null, false);
+    };
+    this.recognition.onend = () => {
+      // si no hubo resultado, onerror ya manejó
+    };
+    try { this.recognition.start(); } catch(e){ callback(null, false); }
+  },
+
+  // Iniciar grabación
+  startRecording(callback){
+    if(!this.supportsRecording) { callback(false); return; }
+    navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
+      this.mediaStream = stream;
+      const options = {mimeType:'audio/webm;codecs=opus'};
+      // Si webm/opus no está soportado, intentar sin códec
+      try{
+        this.recorder = new MediaRecorder(stream, options);
+      }catch(e){
+        this.recorder = new MediaRecorder(stream);
+      }
+      this.audioChunks = [];
+      this.recorder.ondataavailable = e => { if(e.data.size > 0) this.audioChunks.push(e.data); };
+      this.recorder.onstop = () => {
+        const blob = new Blob(this.audioChunks, {type:'audio/webm'});
+        callback(blob, true);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      this.recorder.start();
+      callback(null, true); // grabación iniciada
+    }).catch(() => {
+      callback(false);
+    });
+  },
+
+  stopRecording(){
+    if(this.recorder && this.recorder.state === 'recording'){
+      this.recorder.stop();
+    }
+  },
+
+  // Reproducir audio (blob)
+  playAudio(blob, callback){
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.onended = () => { URL.revokeObjectURL(url); if(callback) callback(); };
+    audio.play().catch(() => { URL.revokeObjectURL(url); });
+  }
+};
+
+// ============================================
+// COMPARACIÓN DIFUSA (similitud de tokens)
+// ============================================
+function normalizedSimilarity(a, b){
+  if(!a || !b) return 0;
+  const tokensA = a.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(Boolean);
+  const tokensB = b.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(Boolean);
+  if(tokensA.length === 0 && tokensB.length === 0) return 1;
+  if(tokensA.length === 0 || tokensB.length === 0) return 0;
+  // Coeficiente de Dice sobre tokens comunes
+  const setA = new Set(tokensA);
+  const setB = new Set(tokensB);
+  let common = 0;
+  setA.forEach(t => { if(setB.has(t)) common++; });
+  return (2 * common) / (tokensA.length + tokensB.length);
+}
+
+function getSpeakingScore(userText, modelText){
+  return Math.round(normalizedSimilarity(userText, modelText) * 100);
+}
+
+// ============================================
+// UTILIDADES
+// ============================================
+function showToast(msg, duration){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), duration || 2500);
+}
+
+function showModal(html){
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal(e){
+  if(e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+function getToday(){ return TODAY; }
+
+function addMinutes(n){
+  const m = state.progress.heatmap[TODAY] || 0;
+  state.progress.heatmap[T
