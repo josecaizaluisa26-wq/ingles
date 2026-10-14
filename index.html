@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="EnglishCoach">
+<meta name="theme-color" content="#1d5b8f">
+<meta name="description" content="Entrenador diario de ingles para Jefe de Produccion. Reactivacion en 12 semanas.">
+<title>EnglishCoach · Entrenamiento diario de ingles</title>
+<style>
+/* ============================================================
+   EnglishCoach · hoja de estilo
+   Estetica: consola de planta / cuaderno de ingeniero.
+   Jerarquia por escala tipografica y espacio, no por sombras.
+   ============================================================ */
+:root{
+  --bg:#eef0f2;
+  --surface:#ffffff;
+  --surface-2:#f6f7f8;
+  --ink:#14181c;
+  --ink-2:#3c4650;
+  --muted:#5c6570;
+  --line:#d5dae0;
+  --line-2:#e6e9ed;
+  --accent:#1d5b8f;
+  --accent-ink:#ffffff;
+  --accent-soft:#e4eef6;
+  --warn:#a8481a;
+  --warn-soft:#fbeade;
+  --ok:#1c6b45;
+  --ok-soft:#e2f1e9;
+  --radius:6px;
+  --radius-sm:4px;
+  --step--1:0.82rem;
+  --step-0:1.06rem;
+  --step-1:1.32rem;
+  --step-2:1.66rem;
+  --step-3:2.06rem;
+  --steps:260ms;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+html[data-theme="dark"]{
+  --bg:#0f1317;
+  --surface:#171d23;
+  --surface-2:#1e252c;
+  --ink:#e7ebef;
+  --ink-2:#c3ccd4;
+  --muted:#98a3ae;
+  --line:#2c353e;
+  --line-2:#232b33;
+  --accent:#4f97cd;
+  --accent-ink:#0b1116;
+  --accent-soft:#1a2b39;
+  --warn:#e0935c;
+  --warn-soft:#33251a;
+  --ok:#61c194;
+  --ok-soft:#15291f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:17px;
+  line-height:1.55;
+  letter-spacing:0;
+}
+@media (min-width:900px){ body{font-size:17.5px} }
+h1,h2,h3,h4{margin:0;line-height:1.2;font-weight:650;letter-spacing:-0.011em}
+h1{font-size:var(--step-2)}
+h2{font-size:var(--step-1)}
+h3{font-size:var(--step-0);font-weight:700}
+p{margin:0 0 0.85em}
+p:last-child{margin-bottom:0}
+ul,ol{margin:0 0 0.85em;padding-left:1.25em}
+li{margin-bottom:0.35em}
+a{color:var(--accent)}
+.brandmark{font-weight:700;letter-spacing:-0.02em}
+
+/* ---------- estructura ---------- */
+.wrap{max-width:820px;margin:0 auto;padding:0 16px}
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:var(--surface);
+  border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top);
+}
+.topbar-in{display:flex;align-items:center;gap:12px;padding:12px 0}
+.topbar .brandmark{font-size:var(--step-0);flex:1;min-width:0}
+.topbar .sub{display:block;font-size:var(--step--1);color:var(--muted);font-weight:400;letter-spacing:0}
+.daytag{
+  font-family:var(--mono);font-size:var(--step--1);
+  border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:4px 8px;color:var(--muted);white-space:nowrap;
+}
+main{padding:20px 0 120px}
+section[role="tabpanel"]{display:none;animation:fade var(--steps) ease}
+section[role="tabpanel"].active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:1ms !important;transition-duration:1ms !important}
+}
+
+/* ---------- navegacion ---------- */
+nav.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+nav.tabs ul{
+  display:grid;grid-template-columns:repeat(6,1fr);
+  list-style:none;margin:0;padding:0;
+}
+nav.tabs button{
+  width:100%;min-height:56px;border:0;background:none;color:var(--muted);
+  font-family:inherit;font-size:0.68rem;line-height:1.15;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  cursor:pointer;padding:6px 2px;
+  transition:color var(--steps) ease;
+}
+nav.tabs button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button[aria-selected="true"]{color:var(--accent);font-weight:650}
+nav.tabs button[aria-selected="true"] svg{stroke-width:2.1}
+@media (min-width:760px){
+  nav.tabs{position:static;border-top:0;border-bottom:1px solid var(--line);padding:0}
+  nav.tabs ul{max-width:820px;margin:0 auto;padding:0 16px;gap:2px}
+  nav.tabs button{min-height:50px;flex-direction:row;gap:8px;font-size:0.9rem;border-bottom:2px solid transparent;border-radius:0}
+  nav.tabs button[aria-selected="true"]{border-bottom-color:var(--accent)}
+  main{padding-bottom:48px}
+}
+
+/* ---------- componentes ---------- */
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:16px;
+  margin:0 0 14px;
+}
+.card.tight{padding:14px}
+.card.flat{background:var(--surface-2)}
+.card h3{margin-bottom:6px}
+.hairline{height:1px;background:var(--line-2);border:0;margin:14px 0}
+.eyebrow{
+  font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;
+  color:var(--muted);font-weight:700;margin-bottom:6px;
+}
+.lead{color:var(--ink-2)}
+.small{font-size:var(--step--1)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+
+button.btn{
+  font-family:inherit;font-size:0.97rem;font-weight:600;
+  min-height:46px;padding:11px 16px;
+  border-radius:var(--radius);border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);
+  cursor:pointer;transition:background var(--steps) ease,border-color var(--steps) ease,color var(--steps) ease;
+}
+button.btn:hover{background:var(--surface-2)}
+button.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.btn.primary:hover{filter:brightness(1.08)}
+button.btn.ghost{background:transparent}
+button.btn.danger{border-color:var(--warn);color:var(--warn)}
+button.btn:disabled{opacity:0.45;cursor:not-allowed}
+button.btn.wide{width:100%}
+button.btn.icon{min-width:46px;padding:11px 12px;font-size:1.05rem}
+button.btn.sm{min-height:40px;padding:8px 12px;font-size:0.88rem;font-weight:500}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:0.78rem;font-weight:600;
+  padding:3px 9px;border-radius:999px;
+  border:1px solid var(--line);color:var(--muted);background:var(--surface-2);
+}
+.chip.acc{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.chip.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+input[type=text],input[type=time],select,textarea{
+  font-family:inherit;font-size:1rem;width:100%;
+  padding:10px 12px;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  min-height:46px;
+}
+textarea{min-height:90px;resize:vertical;line-height:1.5}
+label{font-size:0.86rem;font-weight:600;color:var(--ink-2);display:block;margin-bottom:5px}
+
+/* aviso */
+.notice{
+  border-left:3px solid var(--accent);
+  background:var(--accent-soft);
+  border-radius:0 var(--radius) var(--radius) 0;
+  padding:12px 14px;margin:0 0 14px;
+}
+.notice.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.notice.ok{border-left-color:var(--ok);background:var(--ok-soft)}
+.notice .t{font-weight:700;font-size:0.88rem;margin-bottom:3px}
+.notice p{font-size:0.92rem;color:var(--ink-2)}
+html[data-theme="dark"] .notice p{color:var(--ink-2)}
+
+/* anillo de progreso */
+.ring{display:flex;align-items:center;gap:16px}
+.ring svg{flex:0 0 auto;transform:rotate(-90deg)}
+.ring .track{stroke:var(--line);fill:none}
+.ring .bar{stroke:var(--accent);fill:none;stroke-linecap:round;transition:stroke-dashoffset 400ms ease}
+.ring .val{
+  position:relative;margin-left:-1px;
+  display:flex;flex-direction:column;
+}
+.ring .val b{font-size:var(--step-2);font-weight:700;line-height:1}
+.ring .val span{font-size:var(--step--1);color:var(--muted)}
+
+/* barra de progreso */
+.pbar{height:6px;border-radius:3px;background:var(--line-2);overflow:hidden;margin:8px 0}
+.pbar i{display:block;height:100%;background:var(--accent);transition:width 400ms ease}
+
+/* bloques de la sesion */
+.block{
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--surface);margin-bottom:10px;overflow:hidden;
+}
+.block > header{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;background:none;border:0;
+  font-family:inherit;text-align:left;width:100%;color:var(--ink);
+  min-height:56px;
+}
+.block > header:hover{background:var(--surface-2)}
+.block .num{
+  flex:0 0 30px;height:30px;border-radius:50%;
+  border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;font-weight:700;color:var(--muted);font-family:var(--mono);
+}
+.block.done .num{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.block .ttl{flex:1;min-width:0}
+.block .ttl b{display:block;font-size:0.99rem}
+.block .ttl span{font-size:0.79rem;color:var(--muted)}
+.block .body{padding:0 14px 14px;display:none;border-top:1px solid var(--line-2);padding-top:12px}
+.block.open .body{display:block}
+.block .caret{color:var(--muted);transition:transform var(--steps) ease;font-size:0.8rem}
+.block.open .caret{transform:rotate(90deg)}
+
+/* tarjeta de vocabulario */
+.flash{text-align:center;padding:8px 0}
+.flash .en{font-size:var(--step-2);font-weight:700;letter-spacing:-0.015em}
+.flash .pron{font-family:var(--mono);font-size:0.9rem;color:var(--accent);margin-top:4px}
+.flash .es{font-size:var(--step-1);margin-top:10px}
+.flash .ex{
+  font-size:0.93rem;color:var(--ink-2);margin-top:12px;
+  border-left:3px solid var(--line);padding-left:12px;text-align:left;
+}
+.flash .ex i{color:var(--muted);font-style:normal;display:block;margin-top:3px;font-size:0.88rem}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.grades button{
+  font-family:inherit;font-size:0.82rem;font-weight:600;
+  min-height:52px;border-radius:var(--radius);border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer;padding:6px 2px;line-height:1.2;
+}
+.grades button small{display:block;font-weight:400;color:var(--muted);font-size:0.7rem;margin-top:2px}
+.grades button:hover{background:var(--surface-2)}
+.grades button[data-g="0"]:hover{border-color:var(--warn);color:var(--warn)}
+.grades button[data-g="2"]:hover{border-color:var(--accent);color:var(--accent)}
+.grades button[data-g="3"]:hover{border-color:var(--ok);color:var(--ok)}
+
+/* puntaje de habla */
+.score{display:flex;align-items:baseline;gap:8px;margin:10px 0}
+.score b{font-size:var(--step-2);font-weight:700}
+.score span{color:var(--muted);font-size:var(--step--1)}
+.diff{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.diff span{
+  font-size:0.86rem;padding:2px 7px;border-radius:var(--radius-sm);
+  background:var(--ok-soft);color:var(--ok);border:1px solid transparent;
+}
+.diff span.bad{background:var(--warn-soft);color:var(--warn)}
+
+/* pares minimos */
+.pair{border-top:1px solid var(--line-2);padding:12px 0}
+.pair:first-child{border-top:0;padding-top:0}
+.pair .ph{font-family:var(--mono);font-size:0.86rem;color:var(--accent);font-weight:600}
+.pair .words{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.pair .words button{
+  font-family:inherit;font-size:0.95rem;font-weight:600;
+  padding:8px 12px;min-height:44px;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
+}
+.pair .words button:hover{border-color:var(--accent);color:var(--accent)}
+.pair .tip{font-size:0.89rem;color:var(--muted)}
+
+/* etapas / roleplays */
+.scen{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;background:var(--surface)}
+.scen > button{
+  display:flex;gap:12px;align-items:center;width:100%;text-align:left;
+  padding:14px;background:none;border:0;font-family:inherit;color:var(--ink);
+  cursor:pointer;min-height:60px;
+}
+.scen > button:hover{background:var(--surface-2)}
+.scen .idx{font-family:var(--mono);font-size:0.85rem;color:var(--muted);font-weight:700}
+.scen .nm{flex:1;min-width:0}
+.scen .nm b{display:block;font-size:0.99rem}
+.scen .nm span{font-size:0.8rem;color:var(--muted)}
+.scen .bd{display:none;padding:0 14px 16px;border-top:1px solid var(--line-2);padding-top:14px}
+.scen.open .bd{display:block}
+.step{margin-bottom:14px}
+.step .h{font-weight:700;font-size:0.9rem;color:var(--accent);margin-bottom:5px}
+.phrase{
+  background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  padding:10px 12px;margin-bottom:6px;font-size:0.94rem;
+}
+.phrase b{display:block;font-weight:650}
+.phrase i{font-style:normal;color:var(--muted);font-size:0.86rem}
+
+/* mapa de calor */
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;overflow-x:auto;padding-bottom:4px}
+.heat i{width:13px;height:13px;border-radius:2px;background:var(--line-2);display:block}
+.heat i[data-l="1"]{background:color-mix(in srgb,var(--accent) 25%,var(--surface))}
+.heat i[data-l="2"]{background:color-mix(in srgb,var(--accent) 45%,var(--surface))}
+.heat i[data-l="3"]{background:color-mix(in srgb,var(--accent) 70%,var(--surface))}
+.heat i[data-l="4"]{background:var(--accent)}
+.legend{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--muted);margin-top:8px}
+.legend i{width:13px;height:13px;border-radius:2px;display:block}
+
+/* metricas */
+.mets{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.met{border:1px solid var(--line);border-radius:var(--radius);padding:12px;background:var(--surface)}
+.met .l{font-size:0.76rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:700}
+.met .v{font-size:var(--step-1);font-weight:700;line-height:1.2;margin-top:4px}
+.met .s{font-size:0.78rem;color:var(--muted)}
+@media (min-width:620px){.mets{grid-template-columns:repeat(4,1fr)}}
+
+/* barras por area */
+.bars .b{margin-bottom:10px}
+.bars .b .h{display:flex;justify-content:space-between;font-size:0.86rem;margin-bottom:3px}
+.bars .b .h span{color:var(--muted)}
+
+/* lista de guia */
+.guide h3{margin-top:20px;margin-bottom:8px}
+.guide h3:first-child{margin-top:0}
+table.wk{width:100%;border-collapse:collapse;font-size:0.88rem}
+table.wk th,table.wk td{text-align:left;padding:8px 8px 8px 0;border-bottom:1px solid var(--line-2);vertical-align:top}
+table.wk th{font-size:0.74rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)}
+table.wk td:first-child{font-family:var(--mono);font-weight:700;color:var(--accent);white-space:nowrap;width:34px}
+
+/* modal / onboarding */
+.overlay{
+  position:fixed;inset:0;z-index:100;background:var(--bg);
+  display:none;overflow-y:auto;padding:24px 16px calc(24px + env(safe-area-inset-bottom));
+}
+.overlay.active{display:block}
+.overlay .inner{max-width:620px;margin:0 auto}
+#modal-overlay{background:rgba(10,14,18,0.55);display:none;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.active{display:flex}
+#modal-overlay .sheet{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:20px;
+}
+
+/* onboarding */
+.steps{display:flex;gap:6px;margin-bottom:20px}
+.steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.steps i[data-on="1"]{background:var(--accent)}
+.q{border-top:1px solid var(--line-2);padding-top:16px;margin-top:16px}
+.q:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.q .qt{font-weight:650;margin-bottom:10px}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opts button{
+  font-family:inherit;font-size:0.95rem;text-align:left;
+  padding:12px 14px;min-height:46px;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
+}
+.opts button:hover{border-color:var(--accent);background:var(--accent-soft)}
+.opts button.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:650}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.big{font-size:var(--step-3);font-weight:700;line-height:1.1}
+.center{text-align:center}
+.hide{display:none !important}
+@media print{nav.tabs,.topbar{display:none}main{padding:0}}
+</style>
+</head>
+<body>
+
+<!-- ============================ ONBOARDING ============================ -->
+<div class="overlay active" id="onb" role="dialog" aria-modal="true" aria-labelledby="onb-t">
+  <div class="inner">
+
+    <!-- pantalla 1 -->
+    <div id="onb-1">
+      <div class="steps"><i data-on="1"></i><i></i><i></i></div>
+      <p class="eyebrow">Paso 1 de 3</p>
+      <h1 id="onb-t">Esto no es un curso. Es un entrenamiento.</h1>
+      <p class="lead" style="margin-top:14px">
+        Un curso se aprueba o se abandona. Un entrenamiento se sostiene. Aqui no vas a
+        empezar desde cero: tu ingles no se perdio, se oxido. Vamos a reactivarlo.
+      </p>
+      <div class="card flat">
+        <h3>Que vas a hacer cada dia</h3>
+        <p class="small" style="margin-top:8px">
+          Quince minutos, cinco bloques: calentamiento, repaso, algo nuevo, produccion oral
+          y cierre. Los dias malos hay una sesion de cinco minutos. Nunca es todo o nada.
+        </p>
+      </div>
+      <p class="small muted">
+        Antes de empezar, doce preguntas para medir cuanto conservas. Sin ayuda y sin buscar
+        en internet: no se trata de acertar, se trata de medir.
+      </p>
+      <button class="btn primary wide" onclick="onbGo(2)" style="margin-top:16px">Empezar el diagnostico</button>
+    </div>
+
+    <!-- pantalla 2: diagnostico -->
+    <div id="onb-2" class="hide">
+      <div class="steps"><i data-on="1"></i><i data-on="1"></i><i></i></div>
+      <p class="eyebrow">Paso 2 de 3 · Diagnostico</p>
+      <h1>Doce preguntas</h1>
+      <p class="lead" style="margin-top:10px">
+        Contesta lo que te salga. Si dudas, elige lo que creas correcto y sigue:
+        lo que medimos es tu instinto, no tu certeza.
+      </p>
+      <div id="diag-form" style="margin-top:20px"></div>
+      <div class="row between" style="margin-top:18px">
+        <span class="small muted"><span id="diag-count">0</span> de 12 contestadas</span>
+        <button class="btn primary" id="diag-btn" disabled onclick="onbGo(3)">Ver mi resultado</button>
+      </div>
+    </div>
+
+    <!-- pantalla 3: resultado + hora -->
+    <div id="onb-3" class="hide">
+      <div class="steps"><i data-on="1"></i><i data-on="1"></i><i data-on="1"></i></div>
+      <p class="eyebrow">Paso 3 de 3 · Tu punto de partida</p>
+      <div id="diag-result"></div>
+      <hr class="hairline">
+      <h2 style="margin-bottom:8px">A que hora vas a entrenar</h2>
+      <p class="small muted" style="margin-bottom:12px">
+        Una hora fija y una alarma. La decision se toma una vez, no cada dia.
+        Elige una hora en la que de verdad puedas estar diez minutos tranquilo.
+      </p>
+      <label for="hora">Mi hora diaria</label>
+      <input type="time" id="hora" value="19:00">
+      <label for="nombre" style="margin-top:14px">Tu nombre (opcional)</label>
+      <input type="text" id="nombre" placeholder="Como quieres que te llame" autocomplete="given-name">
+      <button class="btn primary wide" style="margin-top:18px" onclick="finishOnboarding()">Entrar a mi entrenamiento</button>
+      <p class="small muted center" style="margin-top:12px">
+        Todo se guarda en este navegador. No se envia nada a ningun servidor.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================ CABECERA ============================ -->
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <span class="brandmark">
+      <span class="brandmark">EnglishCoach</span>
+      <span class="sub" id="top-sub">Entrenamiento diario · 15 min</span>
+    </span>
+    <span class="daytag" id="daytag">--</span>
+    <button class="btn icon" id="theme-btn" onclick="toggleTheme()" aria-label="Cambiar entre modo claro y oscuro" title="Modo claro / oscuro">◐</button>
+  </div>
+</div>
+
+<nav class="tabs" aria-label="Secciones de la aplicacion">
+  <ul role="tablist">
+    <li><button role="tab" id="tab-hoy" aria-selected="true" aria-controls="p-hoy" onclick="go('hoy')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Hoy</button></li>
+    <li><button role="tab" id="tab-hablar" aria-selected="false" aria-controls="p-hablar" onclick="go('hablar')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Hablar</button></li>
+    <li><button role="tab" id="tab-vocab" aria-selected="false" aria-controls="p-vocab" onclick="go('vocab')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h11a4 4 0 0 1 4 4v12H8a4 4 0 0 0-4 4z"/><path d="M8 8h7M8 12h7"/></svg>Vocabulario</button></li>
+    <li><button role="tab" id="tab-trabajo" aria-selected="false" aria-controls="p-trabajo" onclick="go('trabajo')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12h18"/></svg>Mi Trabajo</button></li>
+    <li><button role="tab" id="tab-progreso" aria-selected="false" aria-controls="p-progreso" onclick="go('progreso')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Progreso</button></li>
+    <li><button role="tab" id="tab-guia" aria-selected="false" aria-controls="p-guia" onclick="go('guia')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 17h.01M12 13c0-2 2-2.2 2-4a2 2 0 1 0-4 0"/></svg>Guia</button></li>
+  </ul>
+</nav>
+
+<main class="wrap">
+
+<!-- ============================ HOY ============================ -->
+<section id="p-hoy" role="tabpanel" aria-labelledby="tab-hoy" class="active">
+  <div class="card">
+    <div class="row between" style="align-items:flex-start">
+      <div>
+        <p class="eyebrow">Sesion de hoy</p>
+        <h2 id="hoy-title">Tu turno de 15 minutos</h2>
+      </div>
+      <span class="chip acc" id="hoy-streak">Racha 0</span>
+    </div>
+    <div class="ring" style="margin-top:14px">
+      <svg width="76" height="76" viewBox="0 0 76 76" aria-hidden="true">
+        <circle class="track" cx="38" cy="38" r="32" stroke-width="7"></circle>
+        <circle class="bar" id="ring-bar" cx="38" cy="38" r="32" stroke-width="7" stroke-dasharray="201" stroke-dashoffset="201"></circle>
+      </svg>
+      <div class="val">
+        <b id="hoy-pct">0%</b>
+        <span id="hoy-min">0 de 17 min estimados</span>
+      </div>
+    </div>
+    <div class="pbar" aria-hidden="true"><i id="hoy-bar" style="width:0%"></i></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn sm" onclick="expresMode()">Sesion exprés (5 min)</button>
+      <span class="small muted" id="hoy-hint">Un dia dificil tambien cuenta.</span>
+    </div>
+  </div>
+
+  <div id="blocks"></div>
+
+  <div class="card" id="closing-card" style="display:none">
+    <p class="eyebrow">Cierre</p>
+    <h2 id="closing-title">Sesion completada</h2>
+    <p class="lead" id="closing-text" style="margin-top:8px"></p>
+    <div id="closing-tomorrow" class="notice" style="margin-top:14px"></div>
+    <hr class="hairline">
+    <label for="reflect">En una linea, que te costo hoy</label>
+    <input type="text" id="reflect" placeholder="Ej: las terminaciones -ed" onchange="saveReflection(this.value)">
+    <div class="row" style="margin-top:14px">
+      <button class="btn primary" onclick="go('progreso')">Ver mi progreso</button>
+      <button class="btn ghost" onclick="go('hablar')">Seguir hablando</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HABLAR ============================ -->
+<section id="p-hablar" role="tabpanel" aria-labelledby="tab-hablar">
+  <div class="card">
+    <p class="eyebrow">Laboratorio de produccion oral</p>
+    <h2>Hablar, aunque salga mal</h2>
+    <p class="lead" style="margin-top:8px">
+      La fluidez no llega leyendo: llega hablando. Aqui practicas frases de tu planta,
+      el microfono te dice que tan cerca estuviste, y repites una vez mas.
+    </p>
+    <div id="speech-support" class="small muted" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <div class="row between">
+      <p class="eyebrow" style="margin:0">Reto del dia</p>
+      <span class="chip" id="ch-speech-lvl">A2</span>
+    </div>
+    <div id="challenge-box" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <div class="row between">
+      <p class="eyebrow" style="margin:0">Banco de retos</p>
+      <select id="ch-filter" onchange="renderChallengeBank()" style="width:auto;min-height:40px;font-size:0.86rem" aria-label="Filtrar retos por nivel">
+        <option value="all">Todos los niveles</option>
+        <option value="A1">A1</option><option value="A2">A2</option><option value="B1">B1</option>
+      </select>
+    </div>
+    <div id="bank" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Sonidos que nos delatan</p>
+    <h3>Pronunciacion para hispanohablantes</h3>
+    <p class="small muted" style="margin:6px 0 14px">
+      Toca cada palabra para escucharla. Di el par seguido, exagerando la diferencia:
+      ahi esta el aprendizaje.
+    </p>
+    <div id="pairs"></div>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Monologo del dia</p>
+    <h3>Sesenta segundos sin parar</h3>
+    <p class="small muted" style="margin:6px 0 12px" id="mono-prompt"></p>
+    <div class="row">
+      <button class="btn" onclick="tts(document.getElementById('mono-prompt').dataset.en)">Escuchar tema</button>
+      <button class="btn" id="mono-timer" onclick="startMonologue()">Iniciar 60 s</button>
+      <span class="mono muted" id="mono-count"></span>
+    </div>
+    <div id="mono-self" class="hide" style="margin-top:14px">
+      <p class="small" style="margin-bottom:8px">Como te fue?</p>
+      <div class="row">
+        <button class="btn sm" onclick="monoRate(0)">Me costo</button>
+        <button class="btn sm" onclick="monoRate(1)">Regular</button>
+        <button class="btn sm" onclick="monoRate(2)">Bien</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ VOCABULARIO ============================ -->
+<section id="p-vocab" role="tabpanel" aria-labelledby="tab-vocab">
+  <div class="card">
+    <p class="eyebrow">Repaso espaciado</p>
+    <h2>Vocabulario de tu planta</h2>
+    <p class="lead" style="margin-top:8px">
+      Cada palabra vuelve justo cuando estas a punto de olvidarla. Si la tienes clara,
+      tarda semanas en reaparecer; si la fallas, vuelve hoy mismo.
+    </p>
+    <div class="mets" style="margin-top:14px">
+      <div class="met"><div class="l">Vencidas</div><div class="v" id="v-due">0</div><div class="s">para hoy</div></div>
+      <div class="met"><div class="l">Dominadas</div><div class="v" id="v-dom">0</div><div class="s">intervalo 21+ dias</div></div>
+      <div class="met"><div class="l">Aprendiendo</div><div class="v" id="v-learn">0</div><div class="s">en rotacion corta</div></div>
+      <div class="met"><div class="l">Retencion</div><div class="v" id="v-ret">—</div><div class="s">ultimos 30 dias</div></div>
+    </div>
+  </div>
+
+  <div class="card" id="srs-card">
+    <div class="row between">
+      <span class="chip" id="srs-area">—</span>
+      <span class="small muted" id="srs-progress">—</span>
+    </div>
+    <div id="srs-box" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Explorar el mazo</p>
+    <div class="row">
+      <select id="deck-area" onchange="renderDeck()" style="flex:1;min-width:180px" aria-label="Filtrar por area">
+        <option value="all">Todas las areas</option>
+      </select>
+      <select id="deck-level" onchange="renderDeck()" style="width:auto;min-height:46px" aria-label="Filtrar por nivel">
+        <option value="all">Todo nivel</option>
+        <option value="A1">A1</option><option value="A2">A2</option><option value="B1">B1</option>
+      </select>
+    </div>
+    <div id="deck" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ============================ MI TRABAJO ============================ -->
+<section id="p-trabajo" role="tabpanel" aria-labelledby="tab-trabajo">
+  <div class="card">
+    <p class="eyebrow">Role-plays de Jefe de Produccion</p>
+    <h2>Tu puesto, en ingles</h2>
+    <p class="lead" style="margin-top:8px">
+      Ocho situaciones reales de tu planta. Cada una trae contexto, frases modelo,
+      tu turno para hablar y el vocabulario que necesitas. Se marcan como vistas al terminarlas.
+    </p>
+    <div class="pbar" style="margin-top:12px"><i id="scen-bar" style="width:0%"></i></div>
+    <p class="small muted" id="scen-count" style="margin-top:6px">0 de 8 completados</p>
+  </div>
+  <div id="scenarios"></div>
+</section>
+
+<!-- ============================ PROGRESO ============================ -->
+<section id="p-progreso" role="tabpanel" aria-labelledby="tab-progreso">
+  <div class="card">
+    <p class="eyebrow">Tu nivel</p>
+    <div class="row between" style="align-items:flex-end">
+      <div>
+        <h2 id="pg-level">A2 · Funcional</h2>
+        <p class="small muted" id="pg-xp-line">0 XP acumulados</p>
+      </div>
+      <div class="ring" style="gap:10px">
+        <svg width="62" height="62" viewBox="0 0 62 62" aria-hidden="true">
+          <circle class="track" cx="31" cy="31" r="26" stroke-width="6"></circle>
+          <circle class="bar" id="xp-bar" cx="31" cy="31" r="26" stroke-width="6" stroke-dasharray="163" stroke-dashoffset="163"></circle>
+        </svg>
+        <div class="val" style="margin-left:0"><b id="xp-pct" style="font-size:var(--step-1)">0%</b><span>al siguiente</span></div>
+      </div>
+    </div>
+    <div class="pbar" style="margin-top:12px"><i id="xp-line" style="width:0%"></i></div>
+    <p class="small muted" style="margin-top:8px" id="xp-next"></p>
+  </div>
+
+  <div class="card">
+    <div class="row between">
+      <p class="eyebrow" style="margin:0">Ultimas 12 semanas</p>
+      <span class="chip" id="pg-grace">Dia de gracia disponible</span>
+    </div>
+    <div class="heat" id="heat" style="margin-top:12px"></div>
+    <div class="legend">
+      <span>Menos</span>
+      <i style="background:var(--line-2)"></i>
+      <i style="background:color-mix(in srgb,var(--accent) 25%,var(--surface))"></i>
+      <i style="background:color-mix(in srgb,var(--accent) 45%,var(--surface))"></i>
+      <i style="background:color-mix(in srgb,var(--accent) 70%,var(--surface))"></i>
+      <i style="background:var(--accent)"></i>
+      <span>Mas</span>
+    </div>
+    <p class="small muted" style="margin-top:10px">
+      Cada cuadro es un dia con los minutos que entrenaste. Doce semanas de cuadros pintados
+      son el mejor argumento contra la idea de que no avanzas.
+    </p>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Insight de la semana</p>
+    <div id="insight"></div>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Tus numeros</p>
+    <div class="mets">
+      <div class="met"><div class="l">Minutos</div><div class="v" id="m-min">0</div><div class="s">acumulados</div></div>
+      <div class="met"><div class="l">Sesiones</div><div class="v" id="m-ses">0</div><div class="s">completadas</div></div>
+      <div class="met"><div class="l">Palabras</div><div class="v" id="m-dom">0</div><div class="s">dominadas</div></div>
+      <div class="met"><div class="l">Habla</div><div class="v" id="m-spk">—</div><div class="s">precision 30 dias</div></div>
+    </div>
+    <hr class="hairline">
+    <p class="eyebrow">Cobertura por area</p>
+    <div class="bars" id="area-bars"></div>
+  </div>
+
+  <div class="card">
+    <p class="eyebrow">Tus datos</p>
+    <p class="small muted" style="margin-bottom:12px">
+      El progreso vive en este navegador y no se envia a ningun servidor. Descarga un respaldo
+      de vez en cuando, sobre todo antes de cambiar de telefono.
+    </p>
+    <div class="row">
+      <button class="btn" onclick="exportProgress()">Descargar respaldo</button>
+      <label class="btn" style="margin:0;display:inline-flex;align-items:center;cursor:pointer">
+        Cargar respaldo<input type="file" accept="application/json,.json" onchange="importProgress(this)" class="sr" style="display:none">
+      </label>
+      <button class="btn danger" onclick="confirmReset()">Reiniciar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GUIA ============================ -->
+<section id="p-guia" role="tabpanel" aria-labelledby="tab-guia">
+  <div class="card guide">
+    <p class="eyebrow">El metodo</p>
+    <h2>Por que esto funciona</h2>
+    <p class="lead" style="margin-top:8px">
+      Aprender un idioma de adulto no es memorizar listas: es recuperar lo que ya sabes,
+      usarlo bajo presion y repetirlo en el momento justo. La app hace las cuatro cosas.
+    </p>
+
+    <h3>1. Input comprensible</h3>
+    <p class="small">
+      Entiendes casi todo lo que lees o escuchas, con un poco de esfuerzo. Por eso cada palabra
+      nueva viene dentro de una frase de tu planta: no aprendes "downtime" en abstracto,
+      lo aprendes diciendo que el downtime del turno subio al tres por ciento.
+    </p>
+
+    <h3>2. Recuperacion activa</h3>
+    <p class="small">
+      Reconocer una palabra es facil; producirla cuesta. Aqui siempre se produce primero:
+      dices la frase, luego el microfono te dice que tan cerca estuviste. Ese esfuerzo
+      de recuperar es lo que graba la memoria, no volver a leer.
+    </p>
+
+    <h3>3. Repeticion espaciada</h3>
+    <p class="small">
+      Cada palabra vuelve justo cuando estas a punto de olvidarla: primero hoy, luego en
+      tres dias, luego en una semana, luego en un mes. Es lo contrario de repasar toda la
+      lista cada dia, que es lo que aburre y lo que no funciona.
+    </p>
+
+    <h3>4. Produccion oral</h3>
+    <p class="small">
+      Sin hablar no hay fluidez, hay conocimiento. Habla aunque tengas errores, aunque te
+      falten palabras, aunque te sientas ridiculo los primeros dias. Los errores que suenan
+      son los que se corrigen; los que no dices no existen.
+    </p>
+
+    <hr class="hairline">
+
+    <h3>Por que 15 minutos diarios le ganan a 3 horas el sabado</h3>
+    <p class="small">
+      La memoria de un idioma se forma por repeticion distribuida en el tiempo: seis sesiones
+      de quince minutos hacen mas que una de tres horas con el mismo total de minutos.
+      Y hay una segunda razon, mas importante: tres horas el sabado se abandonan a la tercera
+      semana, quince minutos diarios se sostienen seis meses. Lo que se sostiene es lo que funciona.
+    </p>
+
+    <h3>Como se llega a la fluidez</h3>
+    <ul class="small">
+      <li><b>Aprende bloques, no palabras sueltas.</b> No guardes "need", guarda "We need to sort this out today".</li>
+      <li><b>Deja de traducir palabra por palabra.</b> El ingles tiene su orden; traducir del espanol te deja frases que suenan raras.</li>
+      <li><b>No persigas la gramatica perfecta.</b> Nadie te va a corregir el presente perfecto en una reunion de produccion. Te van a corregir si no entienden el mensaje.</li>
+      <li><b>Protege el habito por encima del contenido.</b> Un dia de cinco minutos vale mas que un dia perfecto que no hiciste.</li>
+      <li><b>Busca una conversacion real cada mes.</b> Un colega, un proveedor, un tutor. La app es el gimnasio; la conversacion es el partido.</li>
+    </ul>
+
+    <h3>Que hacer cuando aparezca el aburrimiento</h3>
+    <ul class="small">
+      <li><b>Regla de los dos minutos:</b> abre la app y haz solo el bloque 1. Casi siempre seguiras.</li>
+      <li><b>Cambia el tema, no el metodo:</b> si el vocabulario aburre, vete a Mi Trabajo y haz un role-play.</li>
+      <li><b>Mira el mapa de calor</b> antes de decidir que no avanzas.</li>
+      <li><b>No negocies el dia de gracia:</b> es uno por semana, automatico. Fuera de eso, la sesion exprés.</li>
+    </ul>
+
+    <h3>Como usar el reconocimiento de voz sin frustrarte</h3>
+    <p class="small">
+      El microfono no te califica a ti: mide la distancia entre lo que crees que dijiste y lo
+      que se oyo. Si el puntaje sale bajo, el problema casi siempre esta en tres lugares
+      concretos: las terminaciones (-s, -ed), las vocales cortas y largas (ship / sheep) y el
+      ritmo de la frase. Practica el mismo reto dos veces y compara. Esa comparacion es el
+      aprendizaje, no el numero.
+    </p>
+  </div>
+
+  <div class="card guide">
+    <p class="eyebrow">Plan de 12 semanas</p>
+    <h2>Tres etapas, tres hitos</h2>
+    <p class="small muted" style="margin:8px 0 14px">
+      Cada etapa termina en algo que existe fuera de tu cabeza: una grabacion, un correo
+      escrito, una conversacion. Si el entregable no existe, la semana no cuenta.
+    </p>
+
+    <h3>Etapa 1 · Reactivacion (semanas 1 a 4)</h3>
+    <p class="small" style="margin-bottom:10px">
+      Romper el oxido e instalar el habito. Aqui no se aprende nada nuevo: se recupera lo que
+      ya esta en tu cabeza y se demuestra que sigue ahi. Todo gira alrededor de tu turno,
+      tu planta y tu seguridad.
+    </p>
+    <table class="wk">
+      <thead><tr><th>Sem</th><th>Foco</th><th>Entregable</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Instalar el sistema: app subida, diagnostico hecho, hora fija con alarma, 5 sesiones.</td><td>Diagnostico guardado y hora fija escrita.</td></tr>
+        <tr><td>2</td><td>Seguridad industrial: PPE, lockout/tagout, near miss, hazard, safety briefing, incident report.</td><td>Grabacion de un toolbox talk de 60 segundos.</td></tr>
+        <tr><td>3</td><td>Fabrica y procesos: OEE, downtime, bottleneck, throughput, takt time, scrap rate, shift handover.</td><td>Explicar en 90 segundos como se calcula tu OEE.</td></tr>
+        <tr><td>4</td><td>Reuniones de produccion: agenda, action items, follow-up, stakeholder, on track / behind schedule.</td><td><b>Hito 1:</b> "Mi planta en 3 minutos", grabado y sin leer.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:22px">Etapa 2 · Funcional (semanas 5 a 8)</h3>
+    <p class="small" style="margin-bottom:10px">
+      Dejar de reconocer y empezar a usar. Tres actos concretos de tu puesto: reportar un dato,
+      explicar una desviacion y sostener una conversacion dificil sin perder la cortesia.
+    </p>
+    <table class="wk">
+      <thead><tr><th>Sem</th><th>Foco</th><th>Entregable</th></tr></thead>
+      <tbody>
+        <tr><td>5</td><td>Numeros y datos: increase, decrease, target, forecast, average, gap, yield, rate.</td><td>Reportar un KPI con cinco frases encadenadas.</td></tr>
+        <tr><td>6</td><td>Reportar en pasado y verbos de gestion: escalate, allocate, roll out, ramp up, troubleshoot.</td><td>Shift handover de 90 segundos, grabado.</td></tr>
+        <tr><td>7</td><td>Calidad e ISO 9001: defect, tolerance, non-conformance, CAPA, calibration, audit finding.</td><td><b>Hito 2:</b> role-play completo recibiendo a un auditor.</td></tr>
+        <tr><td>8</td><td>Proveedores y reclamos: lead time, purchase order, backorder, quality claim.</td><td>Llamada al proveedor y un correo de reclamo de 120 palabras.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:22px">Etapa 3 · Autonomo (semanas 9 a 12)</h3>
+    <p class="small" style="margin-bottom:10px">
+      Soltar el guion. Hasta aqui hablas de lo que preparaste; ahora se entrena la escucha a
+      velocidad real, la argumentacion y la conversacion espontanea, que es donde aparece la fluidez.
+    </p>
+    <table class="wk">
+      <thead><tr><th>Sem</th><th>Foco</th><th>Entregable</th></tr></thead>
+      <tbody>
+        <tr><td>9</td><td>Escucha a velocidad real: ocho minutos diarios de audio autentico de industria.</td><td>Tres resumenes de 60 segundos de lo escuchado.</td></tr>
+        <tr><td>10</td><td>Argumentar y opinar: however, that said, in my opinion, to sum up, the reason I say this is...</td><td>Defender una decision tecnica durante 4 minutos.</td></tr>
+        <tr><td>11</td><td>Entrevista tecnica con formato STAR y tu hoja de vida traducida.</td><td>Entrevista de 12 minutos grabada y 10 logros en ingles.</td></tr>
+        <tr><td>12</td><td>Conversacion real con alguien que hable ingles.</td><td><b>Hito 3:</b> 10 minutos de conversacion real y diagnostico final.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card guide">
+    <p class="eyebrow">Control</p>
+    <h3>Revisión de los domingos (10 minutos)</h3>
+    <ol class="small">
+      <li>Abre Progreso y lee el insight de la semana.</li>
+      <li>Comprueba adherencia y minutos. Si bajaron, identifica el dia y por que: casi siempre es horario, no motivacion.</li>
+      <li>Marca el entregable de la semana como hecho o no hecho. Sin culpa: es un dato.</li>
+      <li>Descarga un respaldo de tus datos.</li>
+    </ol>
+    <p class="small muted" style="margin-top:12px">
+      Cuatro indicadores y ninguno mas: adherencia de 6 de 7 dias, 1.260 minutos en doce semanas,
+      320 palabras dominadas y una precision de habla de 75 por ciento o mas.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<div id="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="sheet" role="document">
+    <div id="modal-title" style="display:contents"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+
+<script>
+/* ============================================================
+   EnglishCoach · datos
+   Vocabulario, retos de habla, pares minimos, escenarios,
+   diagnostico y plan. Todo vive aqui: la app funciona sin internet.
+   ============================================================ */
+
+/* ---------- mazo de vocabulario ----------
+   [ingles, pronunciacion para hispanohablantes, espanol, ejemplo, area, nivel] */
+const DECK = [
+  /* Fabrica y procesos */
+  ["OEE","ou-i-I","Eficiencia global de los equipos","Our OEE dropped to 72 percent last week.","Fabrica y procesos","A2"],
+  ["throughput","zru-put","Rendimiento, caudal de produccion","We need to increase throughput without adding a shift.","Fabrica y procesos","B1"],
+  ["downtime","daun-taim","Tiempo de parada","Unplanned downtime cost us four hours yesterday.","Fabrica y procesos","A2"],
+  ["bottleneck","bo-tel-nek","Cuello de botella","The packing line is the bottleneck.","Fabrica y procesos","B1"],
+  ["shift handover","shif han-dou-ver","Entrega de turno","Let's do a proper shift handover at two o'clock.","Fabrica y procesos","A2"],
+  ["root cause","rut cos","Causa raiz","We found the root cause: a worn bearing.","Fabrica y procesos","B1"],
+  ["rework","ri-uork","Retrabajo","Rework is up because of the new material.","Fabrica y procesos","A2"],
+  ["scrap rate","skrap reit","Porcentaje de desperdicio","The scrap rate is still above target.","Fabrica y procesos","A2"],
+  ["takt time","takt taim","Tiempo de ciclo requerido","Takt time is 45 seconds per unit.","Fabrica y procesos","B1"],
+  ["work order","uork or-der","Orden de trabajo","Open a work order for the conveyor.","Fabrica y procesos","A1"],
+
+  /* Seguridad */
+  ["PPE","pi-pi-I","Equipo de proteccion personal","PPE is mandatory on the shop floor.","Seguridad","A1"],
+  ["lockout/tagout","lok-aut tag-aut","Bloqueo y etiquetado","Always apply lockout/tagout before maintenance.","Seguridad","B1"],
+  ["near miss","nir mis","Casi accidente","We had a near miss at the loading dock.","Seguridad","A2"],
+  ["hazard","ja-sard","Peligro, riesgo","Report every hazard you see.","Seguridad","A1"],
+  ["safety briefing","seif-ti bri-fing","Charla de seguridad","I give a safety briefing before each shift.","Seguridad","A2"],
+  ["incident report","in-si-dent ri-port","Reporte de incidente","File an incident report today.","Seguridad","A2"],
+  ["housekeeping","jaus-ki-ping","Orden y limpieza","Good housekeeping prevents most slips.","Seguridad","B1"],
+  ["emergency exit","i-mer-yen-si ek-sit","Salida de emergencia","Keep the emergency exits clear.","Seguridad","A1"],
+  ["to wear","uer","Llevar puesto","You must wear safety glasses here.","Seguridad","A1"],
+  ["unsafe act","an-seif akt","Acto inseguro","That was an unsafe act, not an accident.","Seguridad","B1"],
+
+  /* Reuniones */
+  ["agenda","a-yen-da","Orden del dia","The agenda has five items.","Reuniones","A1"],
+  ["action items","ak-shon ai-tems","Compromisos, tareas","Let's review the action items from last week.","Reuniones","A2"],
+  ["follow-up","fo-lou ap","Seguimiento","I'll send a follow-up by email.","Reuniones","A2"],
+  ["to take minutes","teik mi-nits","Tomar acta","Could you take the minutes today?","Reuniones","B1"],
+  ["to loop in","lup in","Incluir en la conversacion","Loop in maintenance on this one.","Reuniones","B1"],
+  ["stakeholder","steik-jol-der","Parte interesada","Production is the main stakeholder here.","Reuniones","B1"],
+  ["deliverable","di-li-ve-ra-bl","Entregable","The deliverable is a revised layout.","Reuniones","B1"],
+  ["on track","on trak","En camino, a tiempo","The project is on track for Friday.","Reuniones","A2"],
+  ["behind schedule","bi-jaind ske-yul","Atrasado","We are two days behind schedule.","Reuniones","A2"],
+  ["to wrap up","rap ap","Cerrar, terminar","Let's wrap up in five minutes.","Reuniones","B1"],
+
+  /* Equipo y personas */
+  ["coaching","kou-ching","Acompanamiento, entrenamiento","He needs coaching on the new machine.","Equipo y personas","B1"],
+  ["onboarding","on-bor-ding","Induccion","Onboarding takes two weeks.","Equipo y personas","B1"],
+  ["appraisal","a-prei-sl","Evaluacion de desempeno","My appraisal is next month.","Equipo y personas","B1"],
+  ["performance issue","per-for-mans i-shu","Problema de desempeno","We need to address a performance issue.","Equipo y personas","B1"],
+  ["headcount","jed-kaunt","Numero de personal","Headcount is fixed for this quarter.","Equipo y personas","B1"],
+  ["shift supervisor","shif su-per-vai-sor","Supervisor de turno","The shift supervisor will report to you.","Equipo y personas","A2"],
+  ["to train","trein","Capacitar","I'll train the new operators myself.","Equipo y personas","A1"],
+  ["absenteeism","ab-sen-ti-i-sm","Ausentismo","Absenteeism went down after the change.","Equipo y personas","B1"],
+  ["to delegate","de-li-gueit","Delegar","You have to delegate more.","Equipo y personas","B1"],
+  ["feedback","fid-bak","Retroalimentacion","Give him feedback the same day.","Equipo y personas","A2"],
+
+  /* Calidad */
+  ["defect","di-fekt","Defecto","We found a defect in lot 42.","Calidad","A2"],
+  ["tolerance","to-le-rans","Tolerancia","The tolerance is plus or minus 0.5 mm.","Calidad","B1"],
+  ["non-conformance","non-con-for-mans","No conformidad","Open a non-conformance report.","Calidad","B1"],
+  ["CAPA","ka-pa","Accion correctiva y preventiva","The CAPA is still open.","Calidad","B1"],
+  ["calibration","ka-li-brei-shon","Calibracion","The gauge is out of calibration.","Calidad","B1"],
+  ["inspection","in-spek-shon","Inspeccion","Inspection passed on the first try.","Calidad","A2"],
+  ["audit finding","o-dit fain-ding","Hallazgo de auditoria","The auditor raised one minor finding.","Calidad","B1"],
+  ["specification","spes-si-fi-kei-shon","Especificacion","Check the specification before you start.","Calidad","B1"],
+  ["sampling","sam-pling","Muestreo","We do random sampling every hour.","Calidad","B1"],
+  ["to comply","kom-plai","Cumplir","We must comply with the standard.","Calidad","B1"],
+
+  /* Logistica y proveedores */
+  ["lead time","lid taim","Plazo de entrega","The lead time is six weeks.","Logistica y proveedores","B1"],
+  ["purchase order","per-chas or-der","Orden de compra","I'll raise the purchase order today.","Logistica y proveedores","A2"],
+  ["backorder","bak-or-der","Pedido pendiente","Two items are on backorder.","Logistica y proveedores","B1"],
+  ["quotation","kuou-tei-shon","Cotizacion","Send me a quotation by Friday.","Logistica y proveedores","A2"],
+  ["shipment","ship-ment","Embarque","The shipment arrives on Monday.","Logistica y proveedores","A1"],
+  ["customs","kas-toms","Aduana","Customs is holding the container.","Logistica y proveedores","B1"],
+  ["quality claim","kua-li-ti kleim","Reclamo de calidad","We filed a quality claim.","Logistica y proveedores","B1"],
+  ["supplier","su-plai-er","Proveedor","Our main supplier is in Italy.","Logistica y proveedores","A1"],
+  ["to expedite","eks-pe-dait","Acelerar, urgir","Can you expedite this order?","Logistica y proveedores","B1"],
+  ["stock level","stok le-vel","Nivel de inventario","Stock level is below the minimum.","Logistica y proveedores","A2"],
+
+  /* Numeros y datos */
+  ["to increase","in-cris","Aumentar","Output increased by eight percent.","Numeros y datos","A1"],
+  ["to decrease","di-cris","Disminuir","Costs decreased slightly.","Numeros y datos","A1"],
+  ["target","tar-guet","Meta","We are above target this month.","Numeros y datos","A1"],
+  ["forecast","for-kast","Pronostico","The forecast looks better for May.","Numeros y datos","B1"],
+  ["average","a-ve-rach","Promedio","The average is 320 units per shift.","Numeros y datos","A2"],
+  ["gap","gap","Brecha, diferencia","There is a ten point gap to target.","Numeros y datos","A2"],
+  ["yield","yild","Rendimiento util","Yield improved after the change.","Numeros y datos","B1"],
+  ["rate","reit","Tasa, velocidad","The defect rate is 1.2 percent.","Numeros y datos","A2"],
+  ["to drop","drop","Caer, bajar","OEE dropped to 68 percent.","Numeros y datos","A1"],
+  ["breakdown","breik-daun","Desglose; averia","Send me a breakdown by line.","Numeros y datos","B1"],
+
+  /* Verbos de gestion */
+  ["to schedule","ske-yul","Programar","Let's schedule the maintenance for Sunday.","Verbos de gestion","A2"],
+  ["to allocate","a-lo-keit","Asignar, destinar","Allocate two people to that line.","Verbos de gestion","B1"],
+  ["to escalate","es-ka-leit","Escalar","Escalate it to the plant manager.","Verbos de gestion","B1"],
+  ["to roll out","rol aut","Implementar, desplegar","We'll roll out the change next month.","Verbos de gestion","B1"],
+  ["to ramp up","ramp ap","Aumentar la produccion","We ramp up in September.","Verbos de gestion","B1"],
+  ["to streamline","strim-lain","Optimizar, simplificar","We need to streamline the process.","Verbos de gestion","B1"],
+  ["to troubleshoot","tra-bl-shut","Diagnosticar y resolver","I troubleshooted the fault myself.","Verbos de gestion","B1"],
+  ["to benchmark","bench-mark","Comparar con referencia","Let's benchmark against our other plant.","Verbos de gestion","B1"],
+  ["to approve","a-pruv","Aprobar","The manager approved the budget.","Verbos de gestion","A2"],
+  ["to monitor","mo-ni-tor","Vigilar, monitorear","Monitor the temperature every hour.","Verbos de gestion","A2"],
+
+  /* Phrasal verbs */
+  ["carry out","ka-ri aut","Llevar a cabo","We carried out the test yesterday.","Phrasal verbs","B1"],
+  ["set up","set ap","Montar, configurar","Set up the line before six.","Phrasal verbs","A2"],
+  ["sort out","sort aut","Resolver","I'll sort it out today.","Phrasal verbs","A2"],
+  ["cut down","kat daun","Reducir","We cut down the changeover time.","Phrasal verbs","A2"],
+  ["follow up","fo-lou ap","Dar seguimiento","Follow up with the supplier.","Phrasal verbs","A2"],
+  ["bring up","bring ap","Plantear, mencionar","Bring it up in the meeting.","Phrasal verbs","B1"],
+  ["look into","luk in-tu","Investigar","I'll look into the deviation.","Phrasal verbs","A2"],
+  ["put off","put of","Posponer","Don't put off the maintenance.","Phrasal verbs","B1"],
+  ["take over","teik ou-ver","Asumir el control","Can you take over the shift?","Phrasal verbs","B1"],
+  ["run out of","ran aut ov","Quedarse sin","We ran out of raw material.","Phrasal verbs","A2"],
+
+  /* Expresiones de reunion */
+  ["I'd like to","aid laik tu","Me gustaria","I'd like to start with the KPIs.","Expresiones de reunion","A2"],
+  ["in my opinion","in mai o-pi-nyon","En mi opinion","In my opinion, the root cause is the material.","Expresiones de reunion","A2"],
+  ["Could you clarify?","kud yu kle-ri-fai","Podria aclarar","Could you clarify what you mean by delay?","Expresiones de reunion","A2"],
+  ["Let's park that","lets park dat","Dejemos eso para despues","Let's park that and come back to it.","Expresiones de reunion","B1"],
+  ["Moving on","mu-ving on","Pasando al siguiente punto","Moving on to safety.","Expresiones de reunion","A2"],
+  ["To sum up","tu sam ap","Para resumir","To sum up, we are two days behind.","Expresiones de reunion","B1"],
+  ["That makes sense","dat meiks sens","Tiene sentido","That makes sense, thanks.","Expresiones de reunion","A1"],
+  ["I see your point","ai si yor point","Entiendo tu punto","I see your point, but we need data.","Expresiones de reunion","B1"],
+  ["Let me get back to you","let mi guet bak tu yu","Te confirmo luego","Let me get back to you on that.","Expresiones de reunion","A2"],
+  ["Just to be clear","yast tu bi clir","Solo para aclarar","Just to be clear, is that a blocker?","Expresiones de reunion","B1"]
+];
+
+const AREAS = ["Fabrica y procesos","Seguridad","Reuniones","Equipo y personas","Calidad",
+               "Logistica y proveedores","Numeros y datos","Verbos de gestion","Phrasal verbs","Expresiones de reunion"];
+
+/* ---------- retos de habla ----------
+   [frase en ingles, nivel, etiqueta] */
+const CHALLENGES = [
+  ["Good morning, everyone. Let's start the daily meeting.","A1","Reuniones"],
+  ["Yesterday we produced 1,200 units.","A1","Numeros"],
+  ["There was no accident during my shift.","A1","Seguridad"],
+  ["Please wear your safety glasses in this area.","A1","Seguridad"],
+  ["The machine is running now.","A1","Fabrica"],
+  ["I need two more operators today.","A1","Equipo"],
+  ["The shipment arrives on Monday.","A1","Logistica"],
+  ["Our target for this week is 6,000 units.","A1","Numeros"],
+  ["Our OEE yesterday was 72 percent, which is below target.","A2","Fabrica"],
+  ["We had two hours of unplanned downtime on line three.","A2","Fabrica"],
+  ["There was a near miss at the loading dock this morning.","A2","Seguridad"],
+  ["I gave a safety briefing about hand protection.","A2","Seguridad"],
+  ["Let's review the action items from last week.","A2","Reuniones"],
+  ["I'll send a follow-up by email this afternoon.","A2","Reuniones"],
+  ["The scrap rate is 1.8 percent, down from 2.3.","A2","Calidad"],
+  ["We found a defect in lot 42 and stopped the line.","A2","Calidad"],
+  ["Can you send me a quotation by Friday?","A2","Logistica"],
+  ["The stock level is below the minimum, so we need to reorder.","A2","Logistica"],
+  ["Output increased by eight percent compared to last month.","A2","Numeros"],
+  ["I'll look into the deviation and get back to you.","A2","Phrasal verbs"],
+  ["The bottleneck is the packing line, so adding capacity there will raise throughput.","B1","Fabrica"],
+  ["We found the root cause: a worn bearing, not the material.","B1","Fabrica"],
+  ["Can you expedite this order? We cannot afford another week of lead time.","B1","Logistica"],
+  ["We filed a quality claim because the parts were outside tolerance.","B1","Calidad"],
+  ["We need to close the CAPA before the audit, or we will get a finding.","B1","Calidad"],
+  ["I'd like to allocate two people to the changeover project.","B1","Verbos de gestion"],
+  ["If we don't escalate this today, we will be behind schedule.","B1","Verbos de gestion"],
+  ["To sum up, we are on track for volume but behind on quality.","B1","Reuniones"],
+  ["Let's park that discussion and come back to it after the safety topic.","B1","Reuniones"],
+  ["I see your point, but we need data before we change the process.","B1","Reuniones"],
+  ["The auditor raised one minor non-conformance about calibration records.","B1","Calidad"],
+  ["I troubleshooted the fault and we recovered the line in forty minutes.","B1","Verbos de gestion"]
+];
+
+/* ---------- sonidos que nos delatan ---------- */
+const PAIRS = [
+  { ph:"/θ/ vs /t/", words:["think","three","thank"],
+    tip:"La lengua va entre los dientes y sale aire, sin voz. Si dices 'tink', 'tree', 'tank' suena a otra palabra. Exagera: saca la lengua un milímetro." },
+  { ph:"/ð/ vs /d/", words:["the","this","that","they"],
+    tip:"Igual que la anterior pero con voz y sin aire. Hispano: sale 'de', 'dis', 'dat'. Es la palabra mas frecuente del ingles: vale la pena." },
+  { ph:"/ɪ/ vs /iː/", words:["ship","sheep","live","leave"],
+    tip:"La corta es relajada y breve; la larga es estirada y sonriente. Confundirlas cambia el significado, no solo el acento." },
+  { ph:"/æ/ (a abierta)", words:["hat","cat","bad","man"],
+    tip:"Boca bien abierta y ancha, como cuando el medico te revisa la garganta. No es 'e' ni 'a' espanola." },
+  { ph:"/v/ vs /b/", words:["very","berry","vote","boat"],
+    tip:"La /v/ es labio contra dientes; la /b/ es labio contra labio. En espanol la /v/ se pronuncia como /b': hay que desaprenderla." },
+  { ph:"Terminacion -s", words:["works","machines","units","places"],
+    tip:"Tres sonidos distintos: /s/ tras p-t-k, /z/ tras vocal o sonido con voz, /ɪz/ tras s-sh-ch. Casi siempre se omite, y ahi se pierde el plural y la tercera persona." },
+  { ph:"Terminacion -ed", words:["worked","planned","started"],
+    tip:"Tres sonidos: /t/, /d/ e /ɪd/. 'Work-t', 'plan-d', 'star-tid'. Nunca 'wor-ked'. Esta terminacion es la que marca el pasado." },
+  { ph:"Grupos consonanticos", words:["strength","months","asked","through"],
+    tip:"No se meten vocales entre las consonantes. Hispano: 'estrend'. Practica lento y luego rapido, sin agregar sonidos." },
+  { ph:"Ritmo y enlaces", words:["I'd like tuh","Whaddya mean","kin I get","lemme see"],
+    tip:"En ingles hablado las palabras se pegan y las vocales se relajan. 'I'd like to' suena 'aid laik tuh'. Eso no es hablar mal: es hablar normal." }
+];
+
+/* ---------- monologo del dia (60 segundos) ---------- */
+const MONOLOGUES = [
+  {es:"Describe tu planta en 60 segundos, como si fuera para alguien que nunca la ha visto.",
+   en:"Describe your plant in sixty seconds, as if to someone who has never seen it."},
+  {es:"Explica que es el OEE y como se calcula en tu linea.",
+   en:"Explain what OEE is and how you calculate it on your line."},
+  {es:"Cuenta un problema de produccion de esta semana y como lo resolviste.",
+   en:"Talk about a production problem this week and how you solved it."},
+  {es:"Explica por que la seguridad es prioridad uno en tu planta.",
+   en:"Explain why safety is the number one priority in your plant."},
+  {es:"Describe como entrenas a un operario nuevo en su primer dia.",
+   en:"Describe how you train a new operator on their first day."},
+  {es:"Cuenta que mejorarias de tu proceso si tuvieras presupuesto libre.",
+   en:"Talk about what you would improve in your process if you had a free budget."},
+  {es:"Explica la diferencia entre calidad y productividad en tu trabajo diario.",
+   en:"Explain the difference between quality and productivity in your daily work."}
+];
+
+/* ---------- diagnostico: 12 preguntas ---------- */
+const DIAG = [
+  {q:"Our OEE ___ 68 percent last week.", o:["was","were","is"], a:0, tag:"Pasado"},
+  {q:"We need to ___ the downtime in the packing area.", o:["reduce","reducing","reduces"], a:0, tag:"Verbo base"},
+  {q:"Have you ___ the incident report?", o:["write","wrote","written"], a:2, tag:"Presente perfecto"},
+  {q:"The shipment ___ arrive on Monday.", o:["will","going","is go"], a:0, tag:"Futuro"},
+  {q:"How many operators ___ on the night shift?", o:["work","works","working"], a:0, tag:"Preguntas"},
+  {q:"I'd like ___ the meeting with the KPIs.", o:["start","starting","to start"], a:2, tag:"Infinitivo"},
+  {q:"If we ___ the changeover time, output will go up.", o:["reduce","will reduce","reduced"], a:0, tag:"Condicional"},
+  {q:"The parts were outside ___.", o:["tolerance","tolerate","tolerant"], a:0, tag:"Sustantivos"},
+  {q:"Cual de estas significa 'cuello de botella'?", o:["bottleneck","backorder","breakdown"], a:0, tag:"Vocabulario"},
+  {q:"No entendiste una palabra en la reunion. Que dices?", o:["Could you clarify that, please?","Repeat please again, I no understand.","I don't understand nothing."], a:0, tag:"Frases utiles"},
+  {q:"We ___ the line for four hours yesterday.", o:["stopped","stop","have stopped"], a:0, tag:"Pasado"},
+  {q:"Cual de estas significa 'vamos dos dias atrasados'?", o:["We are two days behind schedule.","We are two days after calendar.","We have two days late."], a:0, tag:"Frases de reunión"}
+];
+
+/* ---------- escenarios de Mi Trabajo ---------- */
+const SCENARIOS = [
+  { t:"Daily production meeting", s:"Reportar tu turno en 90 segundos",
+    ctx:"Son las 7:00. El gerente de planta y los otros jefes estan en la sala. Te toca a ti: como fue el turno de noche.",
+    steps:[
+      {h:"1. Abre con lo producido", p:[
+        ["Good morning. The night shift produced 1,180 units.","Buenos dias. El turno de noche produjo 1.180 unidades."],
+        ["That is 96 percent of the daily target.","Eso es el 96 por ciento de la meta diaria."]]},
+      {h:"2. El dato incomodo, con su causa", p:[
+        ["Unfortunately, OEE was 68 percent because of two hours of unplanned downtime.","Lamentablemente, el OEE fue 68 por ciento por dos horas de parada no planificada."],
+        ["The root cause was a worn bearing on line three.","La causa raiz fue un rodamiento desgastado en la linea tres."]]},
+      {h:"3. Que hiciste", p:[
+        ["Maintenance replaced it at 3 a.m. and the line is running now.","Mantenimiento lo reemplazo a las 3 y la linea esta funcionando ahora."]]},
+      {h:"4. Cierra con lo que necesitas", p:[
+        ["I need approval to keep a spare bearing in stock.","Necesito aprobacion para mantener un rodamiento de repuesto en stock."],
+        ["I'll send a follow-up by email this afternoon.","Enviare un seguimiento por correo esta tarde."]]}
+    ],
+    turn:"Da tu reporte completo del turno de hoy, de memoria, sin leer.",
+    vocab:["shift handover","unplanned downtime","root cause","on track","follow-up","to approve"] },
+
+  { t:"Explicar una desviacion de KPI", s:"Por que bajo el OEE",
+    ctx:"El gerente te pregunta en la reunion por que el OEE bajo cuatro puntos este mes. No es una acusacion: quiere entender el dato.",
+    steps:[
+      {h:"1. Reconoce el dato sin rodeos", p:[
+        ["OEE dropped from 72 to 68 percent this month.","El OEE bajo de 72 a 68 por ciento este mes."]]},
+      {h:"2. Separa las causas", p:[
+        ["The breakdown came from two things: changeover time and material quality.","La caida vino de dos cosas: tiempo de cambio y calidad del material."],
+        ["Our changeover time is 40 minutes; the benchmark is 25.","Nuestro tiempo de cambio es 40 minutos; la referencia es 25."]]},
+      {h:"3. Di el impacto en plata o volumen", p:[
+        ["That is a gap of about 300 units per week.","Eso es una brecha de unas 300 unidades por semana."]]},
+      {h:"4. Propone, no solo describas", p:[
+        ["I'd like to allocate two people to a changeover project.","Me gustaria asignar dos personas a un proyecto de cambio de formato."],
+        ["If we cut it to 30 minutes, we recover three points.","Si lo bajamos a 30 minutos, recuperamos tres puntos."]]}
+    ],
+    turn:"Explica una desviacion real que tuviste este mes: el dato, las causas, el impacto y tu propuesta.",
+    vocab:["gap","benchmark","to allocate","changeover","to recover","breakdown"] },
+
+  { t:"Safety briefing / toolbox talk", s:"Cinco minutos antes del turno",
+    ctx:"Lunes, 5:50 de la manana. Diez operarios frente a ti, con casco y guantes. Cinco minutos de charla de seguridad, en ingles.",
+    steps:[
+      {h:"1. Abre con el tema de la semana", p:[
+        ["Good morning, everyone. Today's topic is hand protection.","Buenos dias a todos. El tema de hoy es proteccion de manos."]]},
+      {h:"2. Ancla en algo real, no en el manual", p:[
+        ["Last week we had a near miss at the loading dock. Nobody was hurt, but it was close.","La semana pasada tuvimos un casi accidente en el muelle. Nadie salio herido, pero estuvimos cerca."]]},
+      {h:"3. Da la regla en una frase corta", p:[
+        ["Gloves stay on inside this area. No exceptions.","Los guantes se quedan puestos dentro de esta area. Sin excepciones."]]},
+      {h:"4. Cierra pidiendo confirmacion", p:[
+        ["Just to be clear: if you see a hazard, report it the same shift.","Solo para aclarar: si ven un peligro, reportenlo en el mismo turno."],
+        ["Any questions before we start?","Alguna pregunta antes de empezar?"]]}
+    ],
+    turn:"Da tu propio toolbox talk de 60 segundos sobre el tema de seguridad de esta semana.",
+    vocab:["PPE","near miss","hazard","housekeeping","unsafe act","incident report"] },
+
+  { t:"Recibir a un auditor ISO 9001", s:"Acompanar la auditoria en planta",
+    ctx:"El auditor externo llega a tu linea y pregunta por un hallazgo de la auditoria anterior: registros de calibracion.",
+    steps:[
+      {h:"1. Recibe y enmarca", p:[
+        ["Good morning. I'm the Production Manager. I'll walk you through the line.","Buenos dias. Soy el Jefe de Produccion. Lo acompanare por la linea."]]},
+      {h:"2. Cuando pregunta por un registro", p:[
+        ["Let me show you our calibration records for this gauge.","Le muestro nuestros registros de calibracion de este instrumento."],
+        ["The last calibration was on the twelfth of March.","La ultima calibracion fue el doce de marzo."]]},
+      {h:"3. Si NO tienes el dato a mano, no improvises", p:[
+        ["I don't have that figure here. Let me get back to you within the hour.","No tengo ese dato aqui. Le confirmo dentro de la hora."]]},
+      {h:"4. Cuando levanta el hallazgo", p:[
+        ["We accept the finding. We will open a CAPA and close it by the end of the month.","Aceptamos el hallazgo. Abriremos una CAPA y la cerraremos a fin de mes."]]}
+    ],
+    turn:"Simula el momento en que el auditor te pide un registro y no lo tienes a mano. Responde sin improvisar y sin perder autoridad.",
+    vocab:["audit finding","non-conformance","CAPA","calibration","to comply","specification"] },
+
+  { t:"Llamada dificil con un proveedor", s:"Reclamo de calidad o retraso",
+    ctx:"Tu proveedor mando 500 piezas fuera de tolerancia y la linea se detuvo. Necesitas el reemplazo y no quieres perder al proveedor.",
+    steps:[
+      {h:"1. Di el problema con el dato", p:[
+        ["We received the last shipment and 500 units are outside tolerance.","Recibimos el ultimo embarque y 500 unidades estan fuera de tolerancia."],
+        ["That stopped our line for two hours.","Eso detuvo nuestra linea dos horas."]]},
+      {h:"2. Pide, no reclames", p:[
+        ["We need a replacement for those 500 units.","Necesitamos un reemplazo para esas 500 unidades."],
+        ["Could you confirm the earliest possible date?","Podria confirmar la fecha mas temprana posible?"]]},
+      {h:"3. Fija el compromiso por escrito", p:[
+        ["Let's agree on a date today, and please send the confirmation by email.","Acordemos una fecha hoy, y por favor envie la confirmacion por correo."]]},
+      {h:"4. Deja la puerta abierta y la puerta cerrada", p:[
+        ["We want to keep working with you, but we need this closed this week.","Queremos seguir trabajando con ustedes, pero necesitamos esto cerrado esta semana."]]}
+    ],
+    turn:"Haz la llamada completa de 90 segundos: el problema, lo que necesitas, la fecha y el cierre.",
+    vocab:["quality claim","tolerance","lead time","to expedite","to escalate","specification"] },
+
+  { t:"Entrevista tecnica en ingles", s:"Para tu proximo salto de carrera",
+    ctx:"Una empresa multinacional te entrevista para un puesto con mas responsabilidad. Te preguntan por un logro concreto.",
+    steps:[
+      {h:"1. Escucha la pregunta y usa el formato STAR", p:[
+        ["Situation, Task, Action, Result.","Situacion, tarea, accion, resultado."]]},
+      {h:"2. Situacion y tarea, en dos frases", p:[
+        ["In 2024, our line had a scrap rate of 4 percent.","En 2024, nuestra linea tenia un desperdicio del 4 por ciento."],
+        ["My task was to bring it under 2 percent in six months.","Mi tarea era bajarlo a menos del 2 por ciento en seis meses."]]},
+      {h:"3. Accion, con tu rol claro", p:[
+        ["I set up a daily quality meeting and trained the operators.","Estableci una reunion diaria de calidad y capacite a los operarios."]]},
+      {h:"4. Resultado con cifra, y luego te callas", p:[
+        ["We reached 1.6 percent in four months.","Llegamos a 1,6 por ciento en cuatro meses."],
+        ["That was the first time we beat the target in three years.","Fue la primera vez que superamos la meta en tres anos."]]},
+    ],
+    turn:"Cuenta tu mejor logro profesional en 90 segundos con el formato STAR y una cifra concreta.",
+    vocab:["scrap rate","to set up","to train","target","result","to benchmark"] },
+
+  { t:"Presentar resultados mensuales", s:"Al gerente, 4 minutos",
+    ctx:"Cierre de mes. Presentas a la gerencia: volumen, calidad, seguridad y tu propuesta para el mes siguiente.",
+    steps:[
+      {h:"1. Resumen primero, detalle despues", p:[
+        ["To sum up: we hit volume, we missed quality, safety was clean.","Para resumir: cumplimos volumen, fallamos en calidad, seguridad limpia."]]},
+      {h:"2. Un dato por tema, sin adornos", p:[
+        ["Volume increased by 8 percent. The defect rate dropped from 2.3 to 1.8.","El volumen subio 8 por ciento. La tasa de defectos bajo de 2,3 a 1,8."],
+        ["We had zero recordable incidents.","Tuvimos cero incidentes registrables."]]},
+      {h:"3. Lo que no funciono, dilo tu primero", p:[
+        ["Where we are behind is changeover time: it is still 40 minutes.","Donde estamos atrasados es en el tiempo de cambio: sigue en 40 minutos."]]},
+      {h:"4. Pide una decision concreta", p:[
+        ["I'm asking for approval to buy a quick-change system.","Solicito aprobacion para comprar un sistema de cambio rapido."],
+        ["The payback is under eight months.","El retorno es en menos de ocho meses."]]}
+    ],
+    turn:"Presenta tus numeros del mes pasado en 4 minutos, con un dato por tema y una peticion concreta al final.",
+    vocab:["to sum up","yield","defect rate","behind schedule","to approve","payback"] },
+
+  { t:"Instruir a un operario nuevo", s:"Su primer dia en la linea",
+    ctx:"Un operario nuevo entra a tu linea. Le explicas el puesto paso a paso, en ingles, y verificas que entendio.",
+    steps:[
+      {h:"1. Di el objetivo del puesto en una frase", p:[
+        ["Your job is to keep this line running at takt time.","Tu trabajo es mantener esta linea funcionando en tiempo de ciclo."]]},
+      {h:"2. Da las instrucciones en pasos cortos", p:[
+        ["First, check the gauge. Then set up the fixture.","Primero, revisa el instrumento. Luego monta el dispositivo."],
+        ["Set up the line before six o'clock.","Monta la linea antes de las seis."]]},
+      {h:"3. Verifica la comprension (no preguntes 'entendiste?')", p:[
+        ["Show me how you would do the first step.","Muestrame como haria el primer paso."]]},
+      {h:"4. Seguridad y autoridad para parar", p:[
+        ["Never put your hands inside while it is running.","Nunca ponga las manos adentro mientras esta funcionando."],
+        ["If you see anything unsafe, stop the line. You have that authority.","Si ve algo inseguro, pare la linea. Usted tiene esa autoridad."]]}
+    ],
+    turn:"Explica un procedimiento de tu planta a un operario nuevo en 2 minutos, en pasos cortos, y verifica que lo entendio.",
+    vocab:["takt time","to set up","to monitor","to train","to take over","to wear"] }
+];
+
+
+/* ============================================================
+   EnglishCoach · motor de la aplicacion (parte 1 de 3)
+   Estado, utilidades, voz, repeticion espaciada, nivel.
+   Sin dependencias. Sin internet. Todo en localStorage.
+   ============================================================ */
+
+var KEY = 'englishcoach.v1';
+var TOTAL_MIN = 17;
+
+var BLOCKS = [
+  {id:'warm',  n:1, t:'Calentamiento', min:2, sub:'3 frases de tu trabajo, en voz alta'},
+  {id:'review',n:2, t:'Repaso',        min:3, sub:'Tarjetas que te tocan hoy'},
+  {id:'new',   n:3, t:'Material nuevo', min:5, sub:'5 palabras y 1 estructura'},
+  {id:'prod',  n:4, t:'Produccion',    min:5, sub:'1 reto de habla y 1 mini-escritura'},
+  {id:'close', n:5, t:'Cierre',        min:2, sub:'Micro-quiz de 4 y tu reflexion'}
+];
+var EXP = ['warm','review','close'];
+
+/* ---------------- estado ---------------- */
+function blank(){
+  return {
+    v:1, onboarded:false, name:'', hour:'19:00', theme:null,
+    diag:null, xp:0, srs:{}, heat:{}, days:{}, reviews:[], speech:[],
+    scenarios:[], mono:[], writing:{}, grace:{}, created:today()
+  };
+}
+var state = blank();
+
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function today(){
+  var d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+function dstr(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function dayAdd(iso, n){
+  var p = iso.split('-');
+  var d = new Date(+p[0], +p[1]-1, +p[2]);
+  d.setDate(d.getDate() + n);
+  return dstr(d);
+}
+function humanDate(iso){
+  var m = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var d = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  var p = iso.split('-');
+  var dt = new Date(+p[0], +p[1]-1, +p[2]);
+  return d[dt.getDay()] + ' ' + (+p[2]) + ' de ' + m[+p[1]-1];
+}
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+/* atributo seguro para pasar texto a un onclick entre comillas dobles */
+function q(s){ return JSON.stringify(String(s)).replace(/"/g,'&quot;'); }
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return;
+    var o = JSON.parse(raw);
+    if(!o || typeof o !== 'object') return;
+    var b = blank();
+    for(var k in b){ if(Object.prototype.hasOwnProperty.call(b,k)) b[k] = (o[k] === undefined ? b[k] : o[k]); }
+    if(!b.srs || typeof b.srs !== 'object') b.srs = {};
+    if(!b.heat || typeof b.heat !== 'object') b.heat = {};
+    if(!b.days || typeof b.days !== 'object') b.days = {};
+    if(!b.grace || typeof b.grace !== 'object') b.grace = {};
+    if(!b.writing || typeof b.writing !== 'object') b.writing = {};
+    if(!Array.isArray(b.reviews)) b.reviews = [];
+    if(!Array.isArray(b.speech)) b.speech = [];
+    if(!Array.isArray(b.scenarios)) b.scenarios = [];
+    if(!Array.isArray(b.mono)) b.mono = [];
+    state = b;
+  }catch(e){ console.warn('No se pudo leer el progreso guardado:', e); }
+}
+var saveTimer = null;
+function save(){
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 150);
+}
+function saveNow(){
+  if(saveTimer){ clearTimeout(saveTimer); saveTimer = null; }
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ console.warn('No se pudo guardar:', e); }
+}
+
+/* ---------------- aleatoriedad determinista por dia ---------------- */
+function seedRnd(str){
+  var h = 2166136261;
+  for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return function(){
+    h += 0x6D2B79F5;
+    var t = h;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function sample(arr, n, rnd){
+  var a = arr.slice(), out = [];
+  while(out.length < n && a.length){
+    out.push(a.splice(Math.floor(rnd() * a.length), 1)[0]);
+  }
+  return out;
+}
+
+/* ---------------- tema ---------------- */
+function applyTheme(){
+  var t = state.theme;
+  if(!t){
+    t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', t);
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', t === 'dark' ? '#0f1317' : '#1d5b8f');
+}
+function toggleTheme(){
+  var cur = document.documentElement.getAttribute('data-theme');
+  state.theme = (cur === 'dark') ? 'light' : 'dark';
+  applyTheme(); save();
+}
+
+/* ---------------- navegacion ---------------- */
+var TABS = ['hoy','hablar','vocab','trabajo','progreso','guia'];
+function go(tab){
+  if(TABS.indexOf(tab) < 0) tab = 'hoy';
+  for(var i=0;i<TABS.length;i++){
+    var t = TABS[i];
+    var panel = document.getElementById('p-' + t);
+    var btn = document.getElementById('tab-' + t);
+    var on = (t === tab);
+    if(panel) panel.classList.toggle('active', on);
+    if(btn) btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  }
+  if(tab === 'vocab'){ renderDeckFilters(); renderDeck(); renderSrsStats(); renderSrsCard(); }
+  if(tab === 'progreso') renderProgress();
+  if(tab === 'trabajo') renderScenarios();
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- modal ---------------- */
+function showModal(html){
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal(e){
+  if(e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+/* ---------------- voz: escuchar ---------------- */
+var VOICE = null;
+function pickVoice(){
+  if(!('speechSynthesis' in window)) return null;
+  var vs = window.speechSynthesis.getVoices() || [];
+  var prefer = ['en-us','en-gb','en-au','en-ie','en-ca'];
+  for(var i=0;i<prefer.length;i++){
+    for(var j=0;j<vs.length;j++){
+      if(vs[j].lang && vs[j].lang.replace('_','-').toLowerCase().indexOf(prefer[i]) === 0) return vs[j];
+    }
+  }
+  for(var k=0;k<vs.length;k++){ if(vs[k].lang && vs[k].lang.indexOf('en') === 0) return vs[k]; }
+  return vs[0] || null;
+}
+if('speechSynthesis' in window){
+  VOICE = pickVoice();
+  window.speechSynthesis.onvoiceschanged = function(){ VOICE = pickVoice(); };
+}
+function tts(text){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(String(text));
+    if(VOICE) u.voice = VOICE;
+    u.lang = (VOICE && VOICE.lang) ? VOICE.lang : 'en-US';
+    u.rate = 0.92;
+    window.speechSynthesis.speak(u);
+  }catch(e){ console.warn(e); }
+}
+function haveTTS(){ return ('speechSynthesis' in window); }
+function haveSTT(){ return ('SpeechRecognition' in window) || ('webkitSpeechRecognition' in window); }
+
+/* ---------------- comparacion difusa de lo dicho ---------------- */
+function norm(s){
+  return String(s).toLowerCase()
+    .replace(/[\u2018\u2019]/g,"'")
+    .replace(/[^a-z0-9' ]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function words(s){ var n = norm(s); return n ? n.split(' ') : []; }
+function dice(a, b){
+  var wa = words(a), wb = words(b);
+  if(!wa.length && !wb.length) return 1;
+  if(!wa.length || !wb.length) return 0;
+  var pool = wb.slice(), hit = 0;
+  for(var i=0;i<wa.length;i++){
+    var idx = pool.indexOf(wa[i]);
+    if(idx >= 0){ hit++; pool.splice(idx,1); }
+  }
+  return (2 * hit) / (wa.length + wb.length);
+}
+function diffWords(target, said){
+  var t = words(target), s = words(said);
+  var out = [], pool = s.slice();
+  for(var i=0;i<t.length;i++){
+    var idx = pool.indexOf(t[i]);
+    var ok = idx >= 0;
+    if(ok) pool.splice(idx,1);
+    out.push({w:t[i], ok:ok});
+  }
+  return out.concat(pool.map(function(x){ return {w:x, ok:false}; }));
+}
+function diffHtml(target, said){
+  var d = diffWords(target, said), out = '';
+  var n = Math.min(d.length, 40);
+  for(var i=0;i<n;i++){
+    out += '<span' + (d[i].ok ? '' : ' class="bad"') + '>' + esc(d[i].w) + '</span>';
+  }
+  return out;
+}
+
+/* ---------------- motor SRS (SM-2 simplificado) ---------------- */
+function cardKey(c){ return norm(c[0]); }
+function srsOf(c){
+  var k = cardKey(c);
+  if(!state.srs[k]){
+    state.srs[k] = {ease:2.5, interval:0, reps:0, due:today(), lapses:0, en:c[0], area:c[4], level:c[5]};
+  }
+  return state.srs[k];
+}
+function isDue(c){ return srsOf(c).due <= today(); }
+function dueCards(){ return DECK.filter(isDue); }
+function masteredCount(){
+  var n = 0;
+  for(var k in state.srs){ if(state.srs[k].interval >= 21) n++; }
+  return n;
+}
+function learningCount(){
+  var n = 0;
+  for(var k in state.srs){ if(state.srs[k].interval < 21) n++; }
+  return n;
+}
+function gradeCard(c, g){
+  var s = srsOf(c);
+  if(g === 0){
+    s.reps = 0; s.interval = 0; s.lapses++;
+    s.ease = Math.max(1.3, s.ease - 0.2);
+    s.due = today();
+  }else if(g === 1){
+    s.interval = Math.max(1, Math.round(s.interval * 1.2) || 1);
+    s.ease = Math.max(1.3, s.ease - 0.15);
+    s.reps++;
+    s.due = dayAdd(today(), s.interval);
+  }else if(g === 2){
+    s.interval = s.reps === 0 ? 1 : (s.reps === 1 ? 3 : Math.round(s.interval * s.ease));
+    s.reps++;
+    s.due = dayAdd(today(), s.interval);
+  }else{
+    s.interval = s.reps === 0 ? 3 : (s.reps === 1 ? 6 : Math.round(s.interval * s.ease * 1.3));
+    s.ease = Math.min(2.8, s.ease + 0.15);
+    s.reps++;
+    s.due = dayAdd(today(), s.interval);
+  }
+  state.reviews.push({d:today(), ok:(g >= 2), area:c[4]});
+  if(state.reviews.length > 3000) state.reviews = state.reviews.slice(-3000);
+  save();
+}
+function addMinutes(n){
+  var d = today();
+  state.heat[d] = (state.heat[d] || 0) + n;
+  recomputeStreak();
+  save();
+}
+
+/* ---------------- racha con dia de gracia ---------------- */
+function weekKey(iso){
+  var p = iso.split('-');
+  var d = new Date(+p[0], +p[1]-1, +p[2]);
+  var day = (d.getDay() + 6) % 7;
+  var th = new Date(d.getFullYear(), d.getMonth(), d.getDate() - day + 3);
+  var firstThu = new Date(th.getFullYear(), 0, 4);
+  var fday = (firstThu.getDay() + 6) % 7;
+  firstThu = new Date(firstThu.getFullYear(), 0, 4 - fday + 3);
+  var wk = 1 + Math.round((th - firstThu) / (7 * 86400000));
+  return th.getFullYear() + '-S' + pad(wk);
+}
+function recomputeStreak(){
+  var dates = Object.keys(state.heat).filter(function(d){ return state.heat[d] > 0; }).sort();
+  if(!dates.length){ state.streak = 0; state.best = state.best || 0; return; }
+  var start = state.created || dates[0];
+  var cur = start, streak = 0, best = state.best || 0, t = today(), guard = 0;
+  while(cur <= t && guard++ < 4000){
+    if(state.heat[cur] > 0){
+      streak++;
+    }else if(cur !== t){
+      var wk = weekKey(cur);
+      if(!state.grace[wk]){
+        state.grace[wk] = true;   /* dia de gracia: la racha sobrevive */
+        streak++;
+      }else{
+        streak = 0;
+      }
+    }
+    if(streak > best) best = streak;
+    cur = dayAdd(cur, 1);
+  }
+  state.streak = streak;
+  state.best = best;
+}
+function graceLeftThisWeek(){ return state.grace[weekKey(today())] ? 0 : 1; }
+
+/* ---------------- nivel y XP ---------------- */
+var LEVELS = [
+  {min:0,    n:'A1', t:'Reactivando'},
+  {min:500,  n:'A2', t:'Funcional'},
+  {min:1500, n:'B1', t:'Autonomo'},
+  {min:3000, n:'B2', t:'Fluido en reuniones'},
+  {min:5000, n:'C1', t:'Negociando en ingles'}
+];
+function levelOf(xp){
+  var l = LEVELS[0];
+  for(var i=0;i<LEVELS.length;i++){ if(xp >= LEVELS[i].min) l = LEVELS[i]; }
+  return l;
+}
+function nextLevel(xp){
+  for(var i=0;i<LEVELS.length;i++){ if(xp < LEVELS[i].min) return LEVELS[i]; }
+  return null;
+}
+function addXp(n){ state.xp = (state.xp || 0) + n; save(); }
+
+/* ---------------- plan determinista del dia ---------------- */
+function levelFilter(){
+  var lv = (state.diag && state.diag.level) ? state.diag.level : 'A2';
+  if(lv === 'A1') return ['A1'];
+  if(lv === 'B1') return ['B1','A2'];
+  return ['A2','A1'];
+}
+function deckByLevel(){
+  var f = levelFilter();
+  var a = DECK.filter(function(c){ return f.indexOf(c[5]) >= 0; });
+  return a.length ? a : DECK;
+}
+function newWordsOfDay(n){
+  var pool = deckByLevel().filter(function(c){ return !state.srs[cardKey(c)]; });
+  if(!pool.length) pool = deckByLevel().filter(isDue);
+  if(!pool.length) pool = deckByLevel();
+  return sample(pool, n, seedRnd(today() + '-new'));
+}
+function warmPhrases(){
+  var pool = CHALLENGES.filter(function(c){ return levelFilter().indexOf(c[1]) >= 0; });
+  if(!pool.length) pool = CHALLENGES;
+  return sample(pool, 3, seedRnd(today() + '-warm'));
+}
+function challengeOfDay(){
+  var pool = CHALLENGES.filter(function(c){ return levelFilter().indexOf(c[1]) >= 0; });
+  if(!pool.length) pool = CHALLENGES;
+  return sample(pool, 1, seedRnd(today() + '-ch'))[0];
+}
+function monoOfDay(){ return MONOLOGUES[Number(today().replace(/-/g,'')) % MONOLOGUES.length]; }
+function tomorrowFocus(){
+  var d = dayAdd(today(), 1);
+  var area = AREAS[Number(d.replace(/-/g,'')) % AREAS.length];
+  var first = DECK.filter(function(c){ return c[4] === area; })[0];
+  return 'Toca ' + area + ': empiezas con "' + first[0] + '" y sigues con ' + BLOCKS[2].t.toLowerCase() + '.';
+}
+
+
+
+/* ============================================================
+   EnglishCoach · motor (parte 2 de 3)
+   La sesion del dia: cinco bloques. Hablar y monologo.
+   ============================================================ */
+
+/* ---------------- estado del dia ---------------- */
+function dayState(){
+  var d = today();
+  if(!state.days[d]) state.days[d] = {blocks:[], mins:{}, reflection:'', quiz:null, express:false};
+  var s = state.days[d];
+  if(!Array.isArray(s.blocks)) s.blocks = [];
+  if(!s.mins || typeof s.mins !== 'object') s.mins = {};
+  return s;
+}
+function sessionPercent(){
+  var s = dayState(), mins = 0;
+  for(var i=0;i<s.blocks.length;i++){ mins += (s.mins[s.blocks[i]] || 0); }
+  return {pct: Math.round(100 * s.blocks.length / BLOCKS.length), min: mins, done: s.blocks.length};
+}
+
+/* ---------------- pintar los bloques ---------------- */
+function renderBlocks(){
+  var host = document.getElementById('blocks');
+  if(!host) return;
+  var s = dayState();
+  var nextId = null;
+  for(var k=0;k<BLOCKS.length;k++){ if(s.blocks.indexOf(BLOCKS[k].id) < 0){ nextId = BLOCKS[k].id; break; } }
+  var html = '';
+  for(var i=0;i<BLOCKS.length;i++){
+    var b = BLOCKS[i];
+    var done = s.blocks.indexOf(b.id) >= 0;
+    var open = (b.id === nextId);
+    html += '<div class="block' + (done ? ' done' : '') + (open ? ' open' : '') + '" id="bl-' + b.id + '">' +
+      '<header onclick="toggleBlock(\'' + b.id + '\')" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+        '<span class="num">' + (done ? '&#10003;' : b.n) + '</span>' +
+        '<span class="ttl"><b>' + esc(b.t) + '</b><span>' + b.min + ' min · ' + esc(b.sub) + '</span></span>' +
+        '<span class="caret" aria-hidden="true">&#8250;</span>' +
+      '</header>' +
+      '<div class="body" id="body-' + b.id + '"></div>' +
+    '</div>';
+  }
+  host.innerHTML = html;
+  for(var j=0;j<BLOCKS.length;j++) renderBlockBody(BLOCKS[j].id);
+  refreshSession();
+}
+function toggleBlock(id){
+  var el = document.getElementById('bl-' + id);
+  if(!el) return;
+  var willOpen = !el.classList.contains('open');
+  el.classList.toggle('open', willOpen);
+  var h = el.querySelector('header');
+  if(h) h.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+}
+function openBlock(id){
+  var el = document.getElementById('bl-' + id);
+  if(!el) return;
+  el.classList.add('open');
+  var h = el.querySelector('header');
+  if(h) h.setAttribute('aria-expanded','true');
+}
+function renderBlockBody(id){
+  var host = document.getElementById('body-' + id);
+  if(!host) return;
+  if(id === 'warm') host.innerHTML = htmlWarm();
+  else if(id === 'review'){ host.innerHTML = htmlReview(); startReview(); }
+  else if(id === 'new') host.innerHTML = htmlNew();
+  else if(id === 'prod') host.innerHTML = htmlProd();
+  else if(id === 'close') host.innerHTML = htmlClose();
+}
+
+/* ---------------- bloque 1: calentamiento ---------------- */
+function htmlWarm(){
+  var ps = warmPhrases(), h = '';
+  h += '<p class="small muted">Escucha cada frase y repitela en voz alta. Tres frases, treinta segundos: es el arranque.</p>';
+  for(var i=0;i<ps.length;i++){
+    h += '<div class="phrase"><b>' + esc(ps[i][0]) + '</b><i>' + esc(ps[i][2]) + ' · ' + ps[i][1] + '</i>' +
+      '<div class="row" style="margin-top:6px"><button class="btn sm" onclick="tts(' + q(ps[i][0]) + ')">Escuchar</button></div></div>';
+  }
+  h += '<button class="btn primary wide" onclick="markBlock(\'warm\')">Hecho</button>';
+  return h;
+}
+
+/* ---------------- bloque 2: repaso ---------------- */
+var reviewQueue = [], reviewIndex = 0;
+function htmlReview(){
+  var due = dueCards().length, total = Object.keys(state.srs).length;
+  if(!due){
+    return '<p class="small muted">No tienes tarjetas vencidas ahora mismo. ' +
+      (total ? 'Tus ' + total + ' palabras estan al dia: el sistema te avisara cuando toque repasar.'
+             : 'Vuelve despues del bloque 3 y aqui tendras tus primeras tarjetas.') + '</p>' +
+      '<button class="btn primary wide" onclick="markBlock(\'review\')">Hecho</button>';
+  }
+  return '<p class="small muted">' + due + ' tarjeta' + (due === 1 ? '' : 's') +
+    ' para hoy. Di la respuesta en voz alta antes de destaparla.</p>' +
+    '<div id="review-run"></div>' +
+    '<button class="btn wide" style="margin-top:12px" onclick="markBlock(\'review\')">Seguir</button>';
+}
+function startReview(){
+  var host = document.getElementById('review-run');
+  if(!host) return;
+  reviewQueue = dueCards();
+  for(var i=reviewQueue.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1)), t = reviewQueue[i];
+    reviewQueue[i] = reviewQueue[j]; reviewQueue[j] = t;
+  }
+  if(reviewQueue.length > 15) reviewQueue = reviewQueue.slice(0, 15);
+  reviewIndex = 0;
+  drawReview();
+}
+function drawReview(){
+  var host = document.getElementById('review-run');
+  if(!host) return;
+  if(!reviewQueue.length){
+    host.innerHTML = '';
+    return;
+  }
+  if(reviewIndex >= reviewQueue.length){
+    host.innerHTML = '<div class="notice ok"><div class="t">Repaso terminado</div>' +
+      '<p>' + reviewQueue.length + ' tarjeta' + (reviewQueue.length === 1 ? '' : 's') +
+      ' repasadas. Las que sabias no vuelven hasta dentro de semanas.</p></div>';
+    return;
+  }
+  var c = reviewQueue[reviewIndex];
+  host.innerHTML =
+    '<p class="small muted" style="margin-bottom:10px">' + (reviewIndex+1) + ' de ' + reviewQueue.length + '</p>' +
+    '<div class="flash">' +
+      '<div class="en">' + esc(c[0]) + '</div>' +
+      '<div class="pron">' + esc(c[1]) + '</div>' +
+      '<div class="row" style="justify-content:center;margin-top:10px">' +
+        '<button class="btn sm" onclick="tts(' + q(c[0]) + ')">Escuchar</button>' +
+      '</div>' +
+      '<div id="flash-back"></div>' +
+    '</div>' +
+    '<button class="btn primary wide" style="margin-top:10px" id="reveal-btn" onclick="revealCard()">Ver la respuesta</button>';
+}
+function revealCard(){
+  var c = reviewQueue[reviewIndex];
+  if(!c) return;
+  var back = document.getElementById('flash-back');
+  if(!back) return;
+  back.innerHTML = '<div class="es">' + esc(c[2]) + '</div>' +
+    '<div class="ex">' + esc(c[3]) + '<i>' + esc(c[4]) + ' · ' + esc(c[5]) + '</i></div>' +
+    '<div class="grades">' +
+      '<button data-g="0" onclick="grade(0)">Otra vez<small>hoy</small></button>' +
+      '<button data-g="1" onclick="grade(1)">Dificil<small>corto</small></button>' +
+      '<button data-g="2" onclick="grade(2)">Bien<small>normal</small></button>' +
+      '<button data-g="3" onclick="grade(3)">Facil<small>largo</small></button>' +
+    '</div>';
+  var rb = document.getElementById('reveal-btn');
+  if(rb) rb.style.display = 'none';
+}
+function grade(g){
+  var c = reviewQueue[reviewIndex];
+  if(!c) return;
+  gradeCard(c, g);
+  reviewIndex++;
+  drawReview();
+  renderSrsStats();
+}
+
+/* ---------------- bloque 3: material nuevo ---------------- */
+var STRUCTS = [
+  {t:'Pasado simple para reportar',
+   d:'Para contar lo que paso en el turno usa el pasado: worked, stopped, produced, replaced. Si el verbo ya lleva su terminacion -ed, no le agregues "did".',
+   en:'We stopped the line and replaced the bearing.', es:'Paramos la linea y reemplazamos el rodamiento.'},
+  {t:'Presente perfecto para resultados',
+   d:'Cuando el resultado importa ahora, usa have / has + participio: has improved, have received. Es la forma natural de reportar un avance.',
+   en:'OEE has improved since we changed the material.', es:'El OEE ha mejorado desde que cambiamos el material.'},
+  {t:'Primera condicional para proponer',
+   d:'Para proponer una accion: If + presente, will + verbo. Nunca "if we will".',
+   en:'If we reduce changeover time, output will go up.', es:'Si reducimos el tiempo de cambio, la produccion subira.'},
+  {t:'Infinitivo despues de I would like',
+   d:'"I would like" siempre pide to + verbo. Es la formula mas util para pedir algo en una reunion.',
+   en:'I would like to schedule a review on Friday.', es:'Me gustaria programar una revision el viernes.'},
+  {t:'Cantidades y tendencias',
+   d:'Para describir una tendencia: verbo + by + porcentaje (cuanto subio o bajo) o verbo + from X to Y (el recorrido completo).',
+   en:'Defects dropped from 2.3 to 1.8 percent.', es:'Los defectos bajaron de 2,3 a 1,8 por ciento.'},
+  {t:'Pedir algo sin sonar cortante',
+   d:'Los modales suavizan: Could you...? Would it be possible to...? En ingles de trabajo, pedir directo suena agresivo.',
+   en:'Could you confirm the delivery date today?', es:'Podria confirmar la fecha de entrega hoy?'},
+  {t:'Cerrar un compromiso',
+   d:'Para cerrar una conversacion con un acuerdo: Let us agree on + fecha, y luego confirmalo por escrito.',
+   en:'Let us agree on a date, and please confirm by email.', es:'Acordemos una fecha, y por favor confirme por correo.'}
+];
+function structOfDay(){ return STRUCTS[Number(today().replace(/-/g,'')) % STRUCTS.length]; }
+function htmlNew(){
+  var ws = newWordsOfDay(5), struct = structOfDay(), h = '';
+  h += '<p class="small muted">Cinco palabras de tu planta y una estructura. Escucha, repite y sigue: aqui no hay que memorizar nada.</p>';
+  for(var i=0;i<ws.length;i++){
+    var c = ws[i], idx = DECK.indexOf(c);
+    h += '<div class="card tight flat" style="margin-bottom:8px">' +
+      '<div class="row between" style="gap:8px"><b style="flex:1;min-width:0">' + esc(c[0]) + '</b>' +
+      '<button class="btn sm" onclick="tts(' + q(c[0]) + ')">Escuchar</button></div>' +
+      '<div class="mono small" style="color:var(--accent)">' + esc(c[1]) + '</div>' +
+      '<div style="margin-top:6px">' + esc(c[2]) + '</div>' +
+      '<div class="small muted" style="margin-top:6px;font-style:italic">' + esc(c[3]) + '</div>' +
+      '<div class="row" style="margin-top:8px"><span class="chip">' + esc(c[5]) + '</span>' +
+      '<span class="chip">' + esc(c[4]) + '</span>' +
+      '<button class="btn sm ghost" onclick="addToSrs(' + idx + ')">Anadir al repaso</button></div>' +
+    '</div>';
+  }
+  h += '<div class="notice"><div class="t">Estructura de hoy: ' + esc(struct.t) + '</div>' +
+    '<p>' + esc(struct.d) + '</p>' +
+    '<div class="phrase" style="margin-top:8px"><b>' + esc(struct.en) + '</b><i>' + esc(struct.es) + '</i></div>' +
+    '<button class="btn sm" onclick="tts(' + q(struct.en) + ')">Escuchar</button></div>';
+  h += '<button class="btn primary wide" onclick="markBlock(\'new\')">Hecho</button>';
+  return h;
+}
+function addToSrs(idx){
+  var c = DECK[idx];
+  if(!c) return;
+  srsOf(c).due = today();
+  save();
+  renderSrsStats();
+}
+
+/* ---------------- bloque 4: produccion ---------------- */
+function htmlProd(){
+  var c = challengeOfDay();
+  window.__chTarget = c[0];
+  var h = '';
+  h += '<p class="small muted">Un reto de habla con microfono y una mini-escritura. Aqui es donde el ingles se vuelve tuyo.</p>';
+  h += '<div class="notice"><div class="t">Reto de habla · ' + esc(c[1]) + ' · ' + esc(c[2]) + '</div>' +
+       '<p style="font-size:1rem">' + esc(c[0]) + '</p></div>';
+  h += speakWidget('prod', c[0]);
+  h += '<hr class="hairline">';
+  h += '<label for="mini-w">Mini-escritura: escribe dos frases tuyas usando dos palabras de hoy</label>' +
+       '<textarea id="mini-w" placeholder="Ej: Our OEE dropped because of unplanned downtime." onchange="saveWriting(this.value)"></textarea>';
+  h += '<p class="small muted" style="margin-top:6px">Se guarda solo en este navegador.</p>';
+  h += '<button class="btn primary wide" style="margin-top:12px" onclick="markBlock(\'prod\')">Hecho</button>';
+  return h;
+}
+function speakWidget(id, target){
+  var h = '<div class="row"><button class="btn" onclick="tts(' + q(target) + ')">Escuchar modelo</button>';
+  if(haveSTT()) h += '<button class="btn primary" id="mic-' + id + '" onclick="listen(\'' + id + '\')">Hablar</button>';
+  h += '</div><div id="speak-' + id + '" style="margin-top:10px"></div>';
+  if(!haveSTT()){
+    h += '<div class="notice warn" style="margin-top:10px"><div class="t">Sin reconocimiento de voz en este navegador</div>' +
+      '<p>Tu navegador no lo soporta. Practica en voz alta y evalua tu mismo:</p>' +
+      '<div class="row" style="margin-top:8px">' +
+      '<button class="btn sm" onclick="selfRate(\'' + id + '\',0)">Me costo</button>' +
+      '<button class="btn sm" onclick="selfRate(\'' + id + '\',1)">Regular</button>' +
+      '<button class="btn sm" onclick="selfRate(\'' + id + '\',2)">Bien</button></div></div>';
+  }
+  return h;
+}
+var recog = null, recTarget = '';
+function listen(id){
+  var target = '';
+  if(id === 'prod') target = challengeOfDay()[0];
+  else if(id === 'ch') target = window.__chTarget || '';
+  else if(id.indexOf('sc') === 0) target = SCENARIOS[Number(id.slice(2))].turn;
+  else target = window.__bankTarget || '';
+  recTarget = target;
+  var out = document.getElementById('speak-' + id);
+  if(!out) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    out.innerHTML = '<p class="small muted">Este navegador no tiene reconocimiento de voz. Practica en voz alta.</p>';
+    return;
+  }
+  if(recog){ try{ recog.stop(); }catch(e){} }
+  recog = new SR();
+  recog.lang = 'en-US'; recog.interimResults = false; recog.maxAlternatives = 1;
+  out.innerHTML = '<p class="small muted">Escuchando... habla ahora.</p>';
+  var btn = document.getElementById('mic-' + id);
+  if(btn) btn.textContent = 'Escuchando...';
+  var done = false;
+  function finish(text){
+    if(done) return;
+    done = true;
+    if(btn) btn.textContent = 'Hablar';
+    var sc = Math.round(dice(recTarget, text) * 100);
+    state.speech.push({d:today(), score:sc});
+    if(state.speech.length > 1000) state.speech = state.speech.slice(-1000);
+    save();
+    out.innerHTML = '<div class="score"><b>' + sc + '%</b><span>de coincidencia</span></div>' +
+      '<p class="small muted">Escuche: "' + esc(text) + '"</p>' +
+      '<div class="diff">' + diffHtml(recTarget, text) + '</div>' +
+      '<p class="small" style="margin-top:10px">Verde: lo que se entendio. Naranja: lo que hay que repetir. ' +
+      'Hazlo una vez mas y compara los dos numeros: ahi esta el aprendizaje.</p>' +
+      '<div class="row" style="margin-top:8px">' +
+      '<button class="btn sm" onclick="tts(' + q(recTarget) + ')">Escuchar modelo</button>' +
+      '<button class="btn sm" onclick="listen(\'' + id + '\')">Intentar otra vez</button></div>';
+  }
+  recog.onresult = function(ev){
+    var t = '';
+    try{ t = ev.results[0][0].transcript || ''; }catch(e){}
+    finish(t);
+  };
+  recog.onerror = function(){
+    done = true;
+    if(btn) btn.textContent = 'Hablar';
+    out.innerHTML = '<div class="notice warn"><div class="t">No se pudo usar el microfono</div>' +
+      '<p>Revisa el permiso de microfono del navegador. Mientras tanto, evalua tu mismo:</p>' +
+      '<div class="row" style="margin-top:8px">' +
+      '<button class="btn sm" onclick="selfRate(\'' + id + '\',0)">Me costo</button>' +
+      '<button class="btn sm" onclick="selfRate(\'' + id + '\',1)">Regular</button>' +
+      '<button class="btn sm" onclick="selfRate(\'' + id + '\',2)">Bien</button></div></div>';
+  };
+  recog.onend = function(){
+    if(!done){
+      done = true;
+      if(btn) btn.textContent = 'Hablar';
+      out.innerHTML = '<p class="small muted">No se escucho nada. Acercate al microfono e intenta de nuevo.</p>' +
+        '<button class="btn sm" onclick="listen(\'' + id + '\')">Intentar otra vez</button>';
+    }
+  };
+  try{ recog.start(); }
+  catch(e){ out.innerHTML = '<p class="small muted">No se pudo iniciar el microfono.</p>'; }
+}
+function selfRate(id, v){
+  state.speech.push({d:today(), score:[40,65,85][v], self:true});
+  save();
+  var out = document.getElementById('speak-' + id);
+  if(out) out.innerHTML = '<p class="small muted">Anotado: ' + ['te costo','regular','bien'][v] + '.</p>';
+}
+function saveWriting(v){
+  state.writing[today()] = String(v).slice(0, 600);
+  addXp(3); save();
+}
+
+/* ---------------- bloque 5: cierre ---------------- */
+var quizCorrect = 0, quizTotal = 0;
+function htmlClose(){
+  var words = newWordsOfDay(5), qs = quizOfDay(words), h = '';
+  quizCorrect = 0; quizTotal = 0;
+  h += '<p class="small muted">Cuatro preguntas rapidas y una linea de reflexion. Cierra el dia.</p>';
+  for(var i=0;i<qs.length;i++){
+    h += '<div class="q"><div class="qt">' + (i+1) + '. ' + esc(qs[i].q) + '</div><div class="opts" id="q-' + i + '">';
+    for(var j=0;j<qs[i].o.length;j++){
+      h += '<button onclick="answerQuiz(' + i + ',' + j + ',' + qs[i].a + ')">' + esc(qs[i].o[j]) + '</button>';
+    }
+    h += '</div></div>';
+  }
+  h += '<div id="quiz-out" style="margin-top:14px"></div>';
+  h += '<button class="btn primary wide" style="margin-top:14px" onclick="markBlock(\'close\')">Hecho</button>';
+  return h;
+}
+function quizOfDay(cards){
+  var rnd = seedRnd(today() + '-quiz');
+  var pool = (cards && cards.length) ? cards : sample(deckByLevel(), 4, rnd);
+  var qs = [];
+  for(var i=0;i<4 && i<pool.length;i++){
+    var c = pool[i];
+    var others = sample(DECK.filter(function(x){ return x[0] !== c[0]; }), 3, rnd);
+    var opts = [c[0]].concat(others.map(function(x){ return x[0]; }));
+    for(var k=opts.length-1;k>0;k--){
+      var j = Math.floor(rnd()*(k+1)), t = opts[k];
+      opts[k] = opts[j]; opts[j] = t;
+    }
+    qs.push({q:'Cual es "' + c[0] + '"?', o:opts, a:opts.indexOf(c[0])});
+  }
+  return qs;
+}
+function answerQuiz(i, j, a){
+  var host = document.getElementById('q-' + i);
+  if(!host || host.getAttribute('data-done')) return;
+  host.setAttribute('data-done','1');
+  var btns = host.querySelectorAll('button');
+  for(var k=0;k<btns.length;k++){
+    if(k === a) btns[k].classList.add('sel');
+    btns[k].disabled = true;
+  }
+  quizTotal++;
+  if(j === a) quizCorrect++;
+  if(quizTotal >= 4){
+    dayState().quiz = quizCorrect + '/4';
+    save();
+    var out = document.getElementById('quiz-out');
+    if(out){
+      out.innerHTML = '<div class="notice ' + (quizCorrect >= 3 ? 'ok' : '') + '">' +
+        '<div class="t">' + quizCorrect + ' de 4</div><p>' +
+        (quizCorrect >= 3 ? 'Bien. Seguimos manana.'
+          : 'Los errores de hoy son la lista de repaso de manana: el sistema ya los agendo.') +
+        '</p></div>';
+    }
+  }
+}
+function saveReflection(v){
+  dayState().reflection = String(v).slice(0, 240);
+  addXp(5); save();
+}
+
+/* ---------------- avanzar de bloque ---------------- */
+function markBlock(id){
+  var s = dayState();
+  if(s.blocks.indexOf(id) >= 0) return;
+  var b = null;
+  for(var i=0;i<BLOCKS.length;i++){ if(BLOCKS[i].id === id) b = BLOCKS[i]; }
+  if(!b) return;
+  s.blocks.push(id);
+  s.mins[id] = s.express ? Math.max(1, Math.round(b.min / 3)) : b.min;
+  s.express = false;
+  addMinutes(s.mins[id]);
+  addXp(Math.round(b.min * 4) + 10);
+  saveNow();
+  renderBlocks();
+  if(sessionPercent().pct >= 100){
+    finishSession();
+  }else{
+    for(var k=0;k<BLOCKS.length;k++){
+      if(s.blocks.indexOf(BLOCKS[k].id) < 0){ openBlock(BLOCKS[k].id); break; }
+    }
+  }
+  window.scrollTo(0, 0);
+}
+function refreshSession(){
+  var p = sessionPercent();
+  var ring = document.getElementById('ring-bar');
+  if(ring) ring.style.strokeDashoffset = String(Math.round(201 * (1 - p.pct/100)));
+  var pc = document.getElementById('hoy-pct'); if(pc) pc.textContent = p.pct + '%';
+  var mn = document.getElementById('hoy-min'); if(mn) mn.textContent = p.min + ' de ' + TOTAL_MIN + ' min estimados';
+  var bar = document.getElementById('hoy-bar'); if(bar) bar.style.width = p.pct + '%';
+  var st = document.getElementById('hoy-streak'); if(st) st.textContent = 'Racha ' + (state.streak || 0);
+  var hint = document.getElementById('hoy-hint');
+  if(hint) hint.textContent = graceLeftThisWeek()
+    ? 'Tu dia de gracia de esta semana sigue disponible.'
+    : 'El dia de gracia de esta semana ya se uso: hoy cuenta.';
+  var t = document.getElementById('hoy-title');
+  if(t) t.textContent = state.name ? (state.name + ', tu turno de 15 minutos') : 'Tu turno de 15 minutos';
+  var ec = document.getElementById('closing-card');
+  if(ec) ec.style.display = (p.pct >= 100) ? 'block' : 'none';
+}
+function finishSession(){
+  var msgs = [
+    'Sesion completa. Esto es lo que sostiene el progreso: no el dia perfecto, el dia hecho.',
+    'Cerraste la sesion. Manana la memoria te va a devolver esto mas facil.',
+    'Trabajo hecho. El oxido no se quita de una vez: se quita asi, un dia a la vez.',
+    'Terminaste. Lo que hoy te costo, manana ya no te cuesta.'
+  ];
+  var i = Number(today().replace(/-/g,'')) % msgs.length;
+  var ct = document.getElementById('closing-title');
+  if(ct) ct.textContent = state.name ? ('Bien, ' + state.name + '. Sesion completada.') : 'Sesion completada.';
+  var cx = document.getElementById('closing-text');
+  if(cx) cx.textContent = msgs[i] + ' Tu racha va en ' + (state.streak || 0) + ' dias.';
+  var tt = document.getElementById('closing-tomorrow');
+  if(tt) tt.innerHTML = '<div class="t">Expectativa de manana</div><p>' + esc(tomorrowFocus()) + '</p>';
+}
+function expresMode(){
+  var s = dayState();
+  s.express = true;
+  var pending = EXP.filter(function(id){ return s.blocks.indexOf(id) < 0; });
+  if(!pending.length){
+    showModal('<h3>Sesion exprés</h3><p class="small">Ya hiciste los bloques del modo exprés hoy. La sesion completa sigue disponible si tienes tiempo.</p>' +
+      '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Cerrar</button>');
+    return;
+  }
+  openBlock(pending[0]);
+  window.scrollTo(0, 0);
+  showModal('<h3>Sesion exprés activada</h3><p class="small">Cinco minutos: calentamiento, repaso y cierre. Un dia dificil tambien cuenta, y mantener el habito vale mas que la cantidad.</p>' +
+    '<p class="small muted">Empieza en el bloque que quedo abierto arriba.</p>' +
+    '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Entendido</button>');
+}
+
+/* ---------------- habla: laboratorio ---------------- */
+function renderSpeechSupport(){
+  var el = document.getElementById('speech-support');
+  if(!el) return;
+  if(haveSTT() && haveTTS())
+    el.textContent = 'Microfono y voz disponibles en este navegador. Pulsa Hablar y di la frase completa.';
+  else if(haveTTS())
+    el.textContent = 'Puedes escuchar los modelos, pero este navegador no tiene reconocimiento de voz. ' +
+      'En Android funciona bien en Chrome; en iPhone, prueba con Safari y Siri activado. Mientras tanto, practica en voz alta y evalua tu mismo.';
+  else
+    el.textContent = 'Este navegador no soporta voz. Aun asi puedes practicar leyendo cada frase en voz alta: el bloque de produccion sigue contando.';
+}
+function renderChallengeOfDay(){
+  var c = challengeOfDay(), host = document.getElementById('challenge-box');
+  if(!host) return;
+  var lvl = document.getElementById('ch-speech-lvl');
+  if(lvl) lvl.textContent = c[1];
+  window.__chTarget = c[0];
+  host.innerHTML = '<p class="eyebrow">' + esc(c[2]) + ' · ' + esc(c[1]) + '</p>' +
+    '<div class="phrase" style="font-size:1.05rem"><b>' + esc(c[0]) + '</b></div>' +
+    speakWidget('ch', c[0]);
+}
+function renderChallengeBank(){
+  var host = document.getElementById('bank');
+  if(!host) return;
+  var f = document.getElementById('ch-filter');
+  var val = f ? f.value : 'all';
+  var list = CHALLENGES.filter(function(c){ return val === 'all' || c[1] === val; });
+  var html = '';
+  for(var i=0;i<list.length;i++){
+    var c = list[i];
+    html += '<div class="phrase"><div class="row between" style="gap:8px">' +
+      '<b style="flex:1;min-width:0">' + esc(c[0]) + '</b><span class="chip">' + c[1] + '</span></div>' +
+      '<i>' + esc(c[2]) + '</i>' +
+      '<div class="row" style="margin-top:8px">' +
+        '<button class="btn sm" onclick="tts(' + q(c[0]) + ')">Escuchar</button>' +
+        (haveSTT() ? '<button class="btn sm" onclick="listenBank(this,' + q(c[0]) + ')">Hablar</button>' : '') +
+      '</div><div class="bank-out"></div></div>';
+  }
+  host.innerHTML = html || '<p class="small muted">No hay retos con ese filtro.</p>';
+}
+function listenBank(btn, target){
+  window.__bankTarget = target;
+  var wrap = btn.parentNode.parentNode;
+  var out = wrap ? wrap.querySelector('.bank-out') : null;
+  if(!out) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return;
+  var r = new SR();
+  r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 1;
+  out.innerHTML = '<p class="small muted">Escuchando...</p>';
+  r.onresult = function(ev){
+    var t = '';
+    try{ t = ev.results[0][0].transcript || ''; }catch(e){}
+    var sc = Math.round(dice(target, t) * 100);
+    state.speech.push({d:today(), score:sc}); save();
+    out.innerHTML = '<div class="score"><b>' + sc + '%</b><span>de coincidencia</span></div>' +
+      '<div class="diff">' + diffHtml(target, t) + '</div>';
+  };
+  r.onerror = function(){ out.innerHTML = '<p class="small muted">No se pudo usar el microfono.</p>'; };
+  try{ r.start(); }
+  catch(e){ out.innerHTML = '<p class="small muted">No se pudo iniciar.</p>'; }
+}
+function renderPairs(){
+  var host = document.getElementById('pairs');
+  if(!host) return;
+  var html = '';
+  for(var i=0;i<PAIRS.length;i++){
+    var p = PAIRS[i];
+    html += '<div class="pair"><div class="ph">' + esc(p.ph) + '</div><div class="words">';
+    for(var j=0;j<p.words.length;j++){
+      html += '<button onclick="tts(' + q(p.words[j]) + ')">' + esc(p.words[j]) + '</button>';
+    }
+    html += '</div><div class="tip">' + esc(p.tip) + '</div></div>';
+  }
+  host.innerHTML = html;
+}
+var monoTimer = null, monoLeft = 60;
+function renderMonologue(){
+  var el = document.getElementById('mono-prompt');
+  if(!el) return;
+  var m = monoOfDay();
+  el.textContent = m.es;
+  el.setAttribute('data-en', m.en);
+}
+function startMonologue(){
+  var btn = document.getElementById('mono-timer'), cnt = document.getElementById('mono-count');
+  if(monoTimer){
+    clearInterval(monoTimer); monoTimer = null;
+    if(btn) btn.textContent = 'Iniciar 60 s';
+    return;
+  }
+  monoLeft = 60;
+  document.getElementById('mono-self').classList.add('hide');
+  if(btn) btn.textContent = 'Detener';
+  if(cnt) cnt.textContent = '60 s';
+  monoTimer = setInterval(function(){
+    monoLeft--;
+    if(cnt) cnt.textContent = monoLeft + ' s';
+    if(monoLeft <= 0){
+      clearInterval(monoTimer); monoTimer = null;
+      if(btn) btn.textContent = 'Iniciar 60 s';
+      if(cnt) cnt.textContent = 'Listo';
+      document.getElementById('mono-self').classList.remove('hide');
+    }
+  }, 1000);
+}
+function monoRate(v){
+  state.mono.push({d:today(), v:v});
+  state.heat[today()] = (state.heat[today()] || 0) + 1;
+  addXp(10);
+  recomputeStreak();
+  saveNow();
+  showModal('<h3>Anotado</h3><p class="small">Un minuto hablando de tu planta, sin leer. Si puedes, graba ese minuto: en la semana 12 lo vas a escuchar otra vez y vas a notar la diferencia.</p>' +
+    '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Cerrar</button>');
+}
+
+
+
+/* ============================================================
+   EnglishCoach · motor (parte 3 de 3)
+   Vocabulario, Mi Trabajo, Progreso, respaldo y arranque.
+   ============================================================ */
+
+/* ---------------- vocabulario ---------------- */
+function retention(){
+  var cut = dayAdd(today(), -30);
+  var r = state.reviews.filter(function(x){ return x.d >= cut; });
+  if(r.length < 5) return '\u2014';
+  var ok = r.filter(function(x){ return x.ok; }).length;
+  return Math.round(100 * ok / r.length) + '%';
+}
+function renderSrsStats(){
+  var el;
+  el = document.getElementById('v-due');   if(el) el.textContent = dueCards().length;
+  el = document.getElementById('v-dom');   if(el) el.textContent = masteredCount();
+  el = document.getElementById('v-learn'); if(el) el.textContent = learningCount();
+  el = document.getElementById('v-ret');   if(el) el.textContent = retention();
+}
+function renderSrsCard(){
+  var host = document.getElementById('srs-box');
+  if(!host) return;
+  var due = dueCards();
+  var pr = document.getElementById('srs-progress');
+  if(pr) pr.textContent = due.length + ' vencidas';
+  if(!due.length){
+    host.innerHTML = '<div class="notice ok"><div class="t">Nada vencido</div>' +
+      '<p>Estas al dia. El sistema te avisa cuando toque repasar; no hay que forzar.</p></div>' +
+      '<button class="btn primary wide" style="margin-top:12px" onclick="randomReview()">Repasar igual (15 al azar)</button>';
+    return;
+  }
+  host.innerHTML = '<p class="small muted">' + due.length + ' tarjetas vencidas. Puedes repasar aqui o desde el bloque 2 de Hoy.</p>' +
+    '<button class="btn primary wide" style="margin-top:10px" onclick="startReview()">Empezar repaso</button>' +
+    '<div id="review-run" style="margin-top:14px"></div>';
+}
+function randomReview(){
+  var pool = DECK.slice();
+  for(var i=pool.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1)), t = pool[i];
+    pool[i] = pool[j]; pool[j] = t;
+  }
+  reviewQueue = pool.slice(0, 15);
+  reviewIndex = 0;
+  drawReview();
+}
+function renderDeckFilters(){
+  var sel = document.getElementById('deck-area');
+  if(!sel || sel.options.length > 1) return;
+  for(var i=0;i<AREAS.length;i++){
+    var o = document.createElement('option');
+    o.value = AREAS[i];
+    o.textContent = AREAS[i];
+    sel.appendChild(o);
+  }
+}
+function renderDeck(){
+  var host = document.getElementById('deck');
+  if(!host) return;
+  var a = document.getElementById('deck-area'), l = document.getElementById('deck-level');
+  var av = a ? a.value : 'all', lv = l ? l.value : 'all';
+  var list = DECK.filter(function(c){
+    return (av === 'all' || c[4] === av) && (lv === 'all' || c[5] === lv);
+  });
+  if(!list.length){ host.innerHTML = '<p class="small muted">No hay tarjetas con ese filtro.</p>'; return; }
+  var html = '<p class="small muted" style="margin-bottom:10px">' + list.length + ' tarjetas. Escucha, tapa y di la respuesta.</p>';
+  for(var i=0;i<list.length;i++){
+    var c = list[i], s = state.srs[cardKey(c)];
+    var tag = s ? (s.interval >= 21 ? 'dominada' : 'aprendiendo') : 'nueva';
+    var cls = s ? (s.interval >= 21 ? 'ok' : '') : 'acc';
+    html += '<div class="phrase"><div class="row between" style="gap:8px">' +
+      '<b style="flex:1;min-width:0">' + esc(c[0]) + '</b><span class="chip ' + cls + '">' + tag + '</span></div>' +
+      '<div class="mono small" style="color:var(--accent)">' + esc(c[1]) + '</div>' +
+      '<div style="margin-top:6px">' + esc(c[2]) + '</div>' +
+      '<div class="small muted" style="margin-top:5px;font-style:italic">' + esc(c[3]) + '</div>' +
+      '<div class="row" style="margin-top:8px">' +
+      '<button class="btn sm" onclick="tts(' + q(c[0]) + ')">Escuchar</button>' +
+      '<button class="btn sm" onclick="addToSrs(' + DECK.indexOf(c) + ')">Repasar hoy</button>' +
+      '</div></div>';
+  }
+  host.innerHTML = html;
+}
+
+/* ---------------- Mi Trabajo ---------------- */
+function renderScenarios(){
+  var host = document.getElementById('scenarios');
+  if(!host) return;
+  var html = '';
+  for(var i=0;i<SCENARIOS.length;i++){
+    var s = SCENARIOS[i];
+    var done = state.scenarios.indexOf(i) >= 0;
+    html += '<div class="scen" id="sc-' + i + '">' +
+      '<button onclick="toggleScen(' + i + ')" aria-expanded="false">' +
+        '<span class="idx">' + (i+1 < 10 ? '0' : '') + (i+1) + '</span>' +
+        '<span class="nm"><b>' + esc(s.t) + '</b><span>' + esc(s.s) + (done ? ' · completado' : '') + '</span></span>' +
+        '<span class="caret" aria-hidden="true">&#8250;</span>' +
+      '</button><div class="bd" id="scb-' + i + '"></div></div>';
+  }
+  host.innerHTML = html;
+  var bar = document.getElementById('scen-bar');
+  if(bar) bar.style.width = Math.round(100 * state.scenarios.length / SCENARIOS.length) + '%';
+  var cnt = document.getElementById('scen-count');
+  if(cnt) cnt.textContent = state.scenarios.length + ' de ' + SCENARIOS.length + ' completados';
+}
+function toggleScen(i){
+  var el = document.getElementById('sc-' + i);
+  if(!el) return;
+  var open = !el.classList.contains('open');
+  el.classList.toggle('open', open);
+  var b = el.querySelector('button');
+  if(b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if(open) drawScen(i);
+}
+function drawScen(i){
+  var host = document.getElementById('scb-' + i);
+  if(!host || host.getAttribute('data-drawn')) return;
+  host.setAttribute('data-drawn','1');
+  var s = SCENARIOS[i], h = '';
+  h += '<div class="notice"><div class="t">Contexto</div><p>' + esc(s.ctx) + '</p></div>';
+  for(var k=0;k<s.steps.length;k++){
+    var st = s.steps[k];
+    h += '<div class="step"><div class="h">' + esc(st.h) + '</div>';
+    for(var j=0;j<st.p.length;j++){
+      h += '<div class="phrase"><b>' + esc(st.p[j][0]) + '</b><i>' + esc(st.p[j][1]) + '</i>' +
+        '<div class="row" style="margin-top:6px"><button class="btn sm" onclick="tts(' + q(st.p[j][0]) + ')">Escuchar</button></div></div>';
+    }
+    h += '</div>';
+  }
+  h += '<div class="notice warn"><div class="t">Tu turno</div><p>' + esc(s.turn) + '</p></div>';
+  h += speakWidget('sc' + i, s.turn);
+  h += '<hr class="hairline"><p class="eyebrow">Vocabulario del escenario</p><div class="row">';
+  for(var v=0;v<s.vocab.length;v++){
+    h += '<button class="btn sm" onclick="tts(' + q(s.vocab[v]) + ')">' + esc(s.vocab[v]) + '</button>';
+  }
+  h += '</div>';
+  var done = state.scenarios.indexOf(i) >= 0;
+  h += '<button class="btn ' + (done ? '' : 'primary') + ' wide" style="margin-top:14px" onclick="completeScen(' + i + ')">' +
+    (done ? 'Marcar como no completado' : 'Marcar este escenario como completado') + '</button>';
+  host.innerHTML = h;
+}
+function completeScen(i){
+  var at = state.scenarios.indexOf(i);
+  if(at >= 0) state.scenarios.splice(at, 1);
+  else { state.scenarios.push(i); addXp(60); }
+  addMinutes(6);
+  saveNow();
+  renderScenarios();
+  var el = document.getElementById('sc-' + i);
+  if(el){
+    el.classList.add('open');
+    var b = el.querySelector('button');
+    if(b) b.setAttribute('aria-expanded','true');
+  }
+}
+
+/* ---------------- Progreso ---------------- */
+function renderProgress(){
+  var xp = state.xp || 0, lv = levelOf(xp), nx = nextLevel(xp), el;
+  el = document.getElementById('pg-level');
+  if(el) el.textContent = lv.n + ' · ' + lv.t;
+  el = document.getElementById('pg-xp-line');
+  if(el) el.textContent = xp + ' XP · racha de ' + (state.streak || 0) + ' dias (mejor: ' + (state.best || 0) + ')';
+  var pct = 100;
+  if(nx){
+    var span = nx.min - lv.min;
+    pct = Math.max(0, Math.min(100, Math.round(100 * (xp - lv.min) / span)));
+  }
+  var ring = document.getElementById('xp-bar');
+  if(ring) ring.style.strokeDashoffset = String(Math.round(163 * (1 - pct/100)));
+  el = document.getElementById('xp-pct'); if(el) el.textContent = pct + '%';
+  el = document.getElementById('xp-line'); if(el) el.style.width = pct + '%';
+  el = document.getElementById('xp-next');
+  if(el) el.textContent = nx ? ('Te faltan ' + (nx.min - xp) + ' XP para ' + nx.n + ' · ' + nx.t + '.')
+                             : 'Estas en el nivel mas alto de este plan. Ahora se trata de sostenerlo.';
+  el = document.getElementById('pg-grace');
+  if(el){
+    var left = graceLeftThisWeek();
+    el.textContent = left ? 'Dia de gracia disponible' : 'Dia de gracia usado esta semana';
+    el.className = 'chip ' + (left ? 'ok' : 'warn');
+  }
+
+  /* tu nivel tambien sube por practica de habla */
+  var heat = document.getElementById('heat');
+  if(heat){
+    var p2 = today().split('-');
+    var d = new Date(+p2[0], +p2[1]-1, +p2[2]);
+    var dow = (d.getDay() + 6) % 7;
+    var monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dow);
+    var start = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() - 11*7);
+    var html = '';
+    for(var i=0;i<84;i++){
+      var dd = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      var iso = dstr(dd);
+      var m = state.heat[iso] || 0;
+      var lv2 = m === 0 ? 0 : (m <= 5 ? 1 : (m <= 12 ? 2 : (m <= 20 ? 3 : 4)));
+      html += '<i data-l="' + lv2 + '" title="' + iso + ' · ' + m + ' min"></i>';
+    }
+    heat.innerHTML = html;
+  }
+
+  var mins = 0, sessions = 0, k;
+  for(k in state.heat){ mins += state.heat[k] || 0; }
+  for(k in state.days){ if(state.days[k].blocks && state.days[k].blocks.length >= 5) sessions++; }
+  el = document.getElementById('m-min'); if(el) el.textContent = mins;
+  el = document.getElementById('m-ses'); if(el) el.textContent = sessions;
+  el = document.getElementById('m-dom'); if(el) el.textContent = masteredCount();
+  el = document.getElementById('m-spk');
+  if(el){
+    var cut = dayAdd(today(), -30);
+    var sp = state.speech.filter(function(x){ return x.d >= cut; });
+    el.textContent = sp.length
+      ? Math.round(sp.reduce(function(a,b){ return a + b.score; }, 0) / sp.length) + '%'
+      : '\u2014';
+  }
+
+  var bars = document.getElementById('area-bars');
+  if(bars){
+    var html2 = '';
+    for(var a=0;a<AREAS.length;a++){
+      var cards = DECK.filter(function(c){ return c[4] === AREAS[a]; });
+      var dom = cards.filter(function(c){ var s = state.srs[cardKey(c)]; return s && s.interval >= 21; }).length;
+      html2 += '<div class="b"><div class="h"><b>' + esc(AREAS[a]) + '</b><span>' + dom + '/' + cards.length + '</span></div>' +
+        '<div class="pbar"><i style="width:' + Math.round(100 * dom / cards.length) + '%"></i></div></div>';
+    }
+    bars.innerHTML = html2;
+  }
+  renderInsight();
+}
+function renderInsight(){
+  var host = document.getElementById('insight');
+  if(!host) return;
+  var lines = [];
+
+  /* area mas debil */
+  var worst = null, worstPc = 101;
+  for(var a=0;a<AREAS.length;a++){
+    var cards = DECK.filter(function(c){ return c[4] === AREAS[a]; });
+    var dom = cards.filter(function(c){ var s = state.srs[cardKey(c)]; return s && s.interval >= 21; }).length;
+    var pc = dom / cards.length;
+    if(pc < worstPc){ worstPc = pc; worst = AREAS[a]; }
+  }
+  if(worst && worstPc < 0.3){
+    lines.push('<b>Area mas debil: ' + esc(worst) + '.</b> Solo ' + Math.round(worstPc*100) +
+      '% de sus palabras estan dominadas. Que el bloque 3 y el filtro de Vocabulario apunten ahi esta semana.');
+  }
+
+  /* tendencia */
+  var thisWeek = 0, lastWeek = 0, i, j;
+  for(i=0;i<7;i++){ thisWeek += state.heat[dayAdd(today(), -i)] || 0; }
+  for(j=7;j<14;j++){ lastWeek += state.heat[dayAdd(today(), -j)] || 0; }
+  if(thisWeek > lastWeek && lastWeek > 0){
+    lines.push('<b>Vas subiendo:</b> ' + thisWeek + ' minutos esta semana contra ' + lastWeek +
+      ' la anterior. Sostén el horario que estas usando.');
+  }else if(thisWeek < lastWeek && thisWeek > 0){
+    lines.push('<b>Bajaste el ritmo:</b> ' + thisWeek + ' minutos esta semana contra ' + lastWeek +
+      '. No es falta de ganas: revisa si la hora que elegiste sigue siendo realista.');
+  }else if(thisWeek === 0 && lastWeek === 0){
+    lines.push('<b>Todavia no hay datos de esta semana.</b> Abre Hoy y haz el bloque 1: dos minutos y el dia ya cuenta.');
+  }
+
+  /* dia de la semana que mas falla */
+  var names = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+  var zeros = [0,0,0,0,0,0,0], totals = [0,0,0,0,0,0,0];
+  for(var n=0;n<90;n++){
+    var iso = dayAdd(today(), -n), w = iso.split('-');
+    var dt = new Date(+w[0], +w[1]-1, +w[2]);
+    var idx = (dt.getDay() + 6) % 7;
+    totals[idx]++;
+    if(!state.heat[iso]) zeros[idx]++;
+  }
+  var bad = 0, badPc = 0;
+  for(var z=0;z<7;z++){
+    var pc2 = totals[z] ? zeros[z] / totals[z] : 0;
+    if(pc2 > badPc){ badPc = pc2; bad = z; }
+  }
+  if(badPc > 0.35 && totals[bad] > 4){
+    lines.push('<b>Tu dia mas fragil es el ' + names[bad] + '.</b> Ahi fallas ' + Math.round(badPc*100) +
+      '% de las veces. Ponle alarma a doble hora ese dia, o baja a la sesion exprés de 5 minutos: el objetivo es no romper la cadena.');
+  }
+
+  /* retencion */
+  var rt = retention();
+  if(rt !== '\u2014'){
+    var v = parseInt(rt, 10);
+    if(v < 70) lines.push('<b>Retencion baja (' + rt + ').</b> Estas calificando "Bien" tarjetas que todavia no dominas. Se honesto con los botones: mejor una tarjeta mas veces que una palabra que se te cae en la reunion.');
+    else lines.push('<b>Retencion sana (' + rt + ').</b> El ritmo de repaso esta bien calibrado.');
+  }
+
+  /* escenarios */
+  if(state.scenarios.length < 3){
+    lines.push('<b>Role-plays pendientes.</b> Llevas ' + state.scenarios.length + ' de 8. Son la parte mas util para tu puesto: elige uno y hazlo completo, con el microfono.');
+  }else if(state.scenarios.length >= 6){
+    lines.push('<b>Role-plays casi completos (' + state.scenarios.length + '/8).</b> Siguiente paso: lleva uno de estos guiones a una conversacion real esta semana.');
+  }
+
+  var html = '';
+  for(var q2=0;q2<lines.length;q2++){
+    html += '<p class="small" style="margin-bottom:10px">' + lines[q2] + '</p>';
+  }
+  host.innerHTML = html || '<p class="small muted">Haz tu primera sesion y aqui aparece tu analisis de la semana.</p>';
+}
+
+/* ---------------- respaldo ---------------- */
+function exportProgress(){
+  saveNow();
+  try{
+    var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'englishcoach-respaldo-' + today() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1500);
+    showModal('<h3>Respaldo descargado</h3><p class="small">Guardalo en tu computadora o en la nube. Con este archivo puedes recuperar todo tu progreso en otro telefono.</p>' +
+      '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Cerrar</button>');
+  }catch(e){
+    showModal('<h3>No se pudo descargar</h3><p class="small">Tu navegador bloqueo la descarga. Prueba desde Chrome en la computadora.</p>' +
+      '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Cerrar</button>');
+  }
+}
+function importProgress(input){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try{
+      var o = JSON.parse(r.result);
+      if(!o || typeof o !== 'object') throw new Error('formato');
+      var b = blank();
+      for(var k in b){ if(Object.prototype.hasOwnProperty.call(b, k) && o[k] !== undefined) b[k] = o[k]; }
+      b.onboarded = true;
+      state = b;
+      saveNow();
+      applyTheme();
+      renderAll();
+      showModal('<h3>Respaldo cargado</h3><p class="small">Tu progreso volvio: ' + (state.xp || 0) + ' XP, ' +
+        masteredCount() + ' palabras dominadas y racha de ' + (state.streak || 0) + ' dias.</p>' +
+        '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Cerrar</button>');
+    }catch(e){
+      showModal('<h3>Archivo no valido</h3><p class="small">Ese archivo no es un respaldo de EnglishCoach.</p>' +
+        '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Cerrar</button>');
+    }
+    input.value = '';
+  };
+  r.readAsText(f);
+}
+function confirmReset(){
+  showModal('<h3>Reiniciar todo</h3><p class="small">Se borran tu progreso, tu racha, tus tarjetas y tus numeros. Esto no se puede deshacer.</p>' +
+    '<p class="small muted">Si vas a empezar de nuevo, descarga primero un respaldo.</p>' +
+    '<div class="row" style="margin-top:14px">' +
+    '<button class="btn danger" onclick="doReset()">Si, borrar todo</button>' +
+    '<button class="btn ghost" onclick="closeModal()">Cancelar</button></div>');
+}
+function doReset(){
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  state = blank();
+  state.onboarded = false;
+  saveNow();
+  document.getElementById('modal-overlay').classList.remove('active');
+  document.getElementById('onb').classList.add('active');
+  diagAnswers = {};
+  onbGo(1);
+}
+
+/* ---------------- onboarding ---------------- */
+var diagAnswers = {};
+function onbGo(n){
+  for(var i=1;i<=3;i++){
+    var el = document.getElementById('onb-' + i);
+    if(el) el.classList.toggle('hide', i !== n);
+  }
+  if(n === 3) drawDiagResult();
+  window.scrollTo(0, 0);
+}
+function renderDiag(){
+  var host = document.getElementById('diag-form');
+  if(!host) return;
+  var html = '';
+  for(var i=0;i<DIAG.length;i++){
+    html += '<div class="q"><div class="qt">' + (i+1) + '. ' + esc(DIAG[i].q) + '</div><div class="opts" id="d-' + i + '">';
+    for(var j=0;j<DIAG[i].o.length;j++){
+      html += '<button onclick="answerDiag(' + i + ',' + j + ')">' + esc(DIAG[i].o[j]) + '</button>';
+    }
+    html += '</div></div>';
+  }
+  host.innerHTML = html;
+}
+function answerDiag(i, j){
+  diagAnswers[i] = j;
+  var host = document.getElementById('d-' + i);
+  if(host){
+    var btns = host.querySelectorAll('button');
+    for(var k=0;k<btns.length;k++) btns[k].classList.toggle('sel', k === j);
+  }
+  var n = Object.keys(diagAnswers).length;
+  var c = document.getElementById('diag-count');
+  if(c) c.textContent = n;
+  var b = document.getElementById('diag-btn');
+  if(b) b.disabled = (n < DIAG.length);
+}
+function drawDiagResult(){
+  var ok = 0, i;
+  for(i=0;i<DIAG.length;i++){ if(diagAnswers[i] === DIAG[i].a) ok++; }
+  var pct = Math.round(100 * ok / DIAG.length);
+  var level = pct < 40 ? 'A1' : (pct < 75 ? 'A2' : 'B1');
+  state.diag = {score:ok, total:DIAG.length, pct:pct, level:level, date:today()};
+  state.xp = Math.max(state.xp || 0, level === 'A1' ? 120 : (level === 'A2' ? 600 : 1600));
+  saveNow();
+
+  var title, text;
+  if(pct >= 75){
+    title = 'Tu ingles esta mas entero de lo que creias.';
+    text = 'Reconociste el ' + pct + ' por ciento. Eso es nivel funcional con oxido, no principiante. ' +
+      'Arrancas en B1: material de reuniones y calidad desde el primer dia.';
+  }else if(pct >= 40){
+    title = 'Tu ingles no esta perdido: esta oxidado.';
+    text = 'Reconociste el ' + pct + ' por ciento. La estructura basica sigue ahi; lo que falta es practica de produccion. ' +
+      'Arrancas en A2 y en dos semanas vas a notar la diferencia al hablar.';
+  }else{
+    title = 'Hay mas de lo que parece.';
+    text = 'Reconociste el ' + pct + ' por ciento. Pero fijate en algo: reconociste algo. El oxido se quita rapido ' +
+      'cuando el contenido es el tuyo. Arrancas en A1, con frases cortas de planta, y el nivel sube solo.';
+  }
+  var weak = [];
+  for(var k=0;k<DIAG.length;k++){
+    if(diagAnswers[k] !== DIAG[k].a && weak.length < 3) weak.push(DIAG[k].tag);
+  }
+  document.getElementById('diag-result').innerHTML =
+    '<div class="notice ok"><div class="t">' + esc(title) + '</div><p>' + esc(text) + '</p></div>' +
+    '<div class="mets" style="margin-top:14px">' +
+      '<div class="met"><div class="l">Aciertos</div><div class="v">' + ok + '/' + DIAG.length + '</div><div class="s">linea base</div></div>' +
+      '<div class="met"><div class="l">Nivel</div><div class="v">' + level + '</div><div class="s">' + esc(levelOf(state.xp).t) + '</div></div>' +
+    '</div>' +
+    (weak.length ? '<p class="small muted" style="margin-top:12px">Lo que hay que refrescar primero: ' + weak.map(esc).join(', ') + '. El plan arranca justo por ahi.</p>' : '') +
+    '<p class="small muted" style="margin-top:10px">No es una nota ni un examen: es tu punto de partida. En la semana 12 lo repites y comparas.</p>';
+}
+function finishOnboarding(){
+  var h = document.getElementById('hora'), n = document.getElementById('nombre');
+  state.hour = (h && h.value) ? h.value : '19:00';
+  state.name = (n && n.value) ? String(n.value).trim().slice(0, 40) : '';
+  state.onboarded = true;
+  state.created = state.created || today();
+  saveNow();
+  document.getElementById('onb').classList.remove('active');
+  renderAll();
+  showModal('<h3>Todo listo</h3><p class="small">Tu sesion de hoy son cinco bloques y unos 15 minutos. Empieza por el bloque 1: son dos minutos y ya cuenta.</p>' +
+    '<p class="small muted">Tu hora diaria: <b>' + esc(state.hour) + '</b>. Ponle alarma al telefono ahora mismo.</p>' +
+    '<button class="btn primary wide" style="margin-top:12px" onclick="closeModal()">Empezar</button>');
+}
+
+/* ---------------- arranque ---------------- */
+function renderAll(){
+  var dt = document.getElementById('daytag');
+  if(dt) dt.textContent = humanDate(today());
+  var sub = document.getElementById('top-sub');
+  if(sub) sub.textContent = (state.name ? state.name + ' · ' : '') + 'Entrenamiento diario · 15 min';
+  renderBlocks();
+  renderChallengeOfDay();
+  renderChallengeBank();
+  renderPairs();
+  renderMonologue();
+  renderSpeechSupport();
+  renderSrsStats();
+  renderSrsCard();
+  renderDeckFilters();
+  renderDeck();
+  renderProgress();
+  renderScenarios();
+}
+function initManifest(){
+  try{
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">' +
+      '<rect width="512" height="512" fill="#1d5b8f"/>' +
+      '<text x="256" y="330" font-size="210" font-family="sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">EC</text></svg>';
+    var man = {
+      name:'EnglishCoach', short_name:'EnglishCoach', start_url:'.',
+      display:'standalone', background_color:'#eef0f2', theme_color:'#1d5b8f',
+      icons:[{src:'data:image/svg+xml;base64,' + btoa(svg), sizes:'512x512', type:'image/svg+xml'}]
+    };
+    var blob = new Blob([JSON.stringify(man)], {type:'application/manifest+json'});
+    var l = document.createElement('link');
+    l.rel = 'manifest';
+    l.href = URL.createObjectURL(blob);
+    document.head.appendChild(l);
+  }catch(e){ console.warn('manifest', e); }
+}
+function boot(){
+  load();
+  applyTheme();
+  renderDiag();
+  if(state.onboarded){
+    document.getElementById('onb').classList.remove('active');
+    renderAll();
+  }else{
+    document.getElementById('onb').classList.add('active');
+    onbGo(1);
+  }
+  initManifest();
+  setInterval(function(){
+    var dt = document.getElementById('daytag');
+    if(dt && dt.textContent !== humanDate(today())) renderAll();
+  }, 60000);
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+
+
+</script>
+</body>
+</html>
